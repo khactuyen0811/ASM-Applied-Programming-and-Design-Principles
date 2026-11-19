@@ -1,0 +1,43 @@
+@model SIMS.Models.ErrorViewModel
+@{
+    Layout = "_LuminaAuthLayout";
+    ViewData["Title"] = "System Error";
+}
+
+<main class="flex min-h-screen items-center justify-center bg-light-surface-subtle px-4 py-12 dark:bg-dark-surface">
+    <div class="w-full max-w-xl space-y-6 rounded-2xl border border-light-border bg-light-surface p-8 text-center shadow-xl sm:p-10 dark:border-dark-border dark:bg-dark-surface">
+        <div class="mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-error-container text-error shadow-inner">
+            <span class="material-symbols-outlined text-[54px]">report</span>
+        </div>
+
+        <div>
+            <span class="inline-flex rounded-full bg-error-container px-3 py-1 text-label-sm font-bold uppercase tracking-wider text-error">HTTP 500</span>
+            <h1 class="mt-2 font-headline text-headline-xl-mobile font-bold text-light-on-surface sm:text-headline-xl dark:text-dark-on-surface">Something went wrong</h1>
+            <p class="mx-auto mt-2 max-w-md text-body-md text-light-on-surface-muted dark:text-dark-on-surface-muted">
+                The registrar service could not complete your request. The incident has been logged and the administrative team has been notified.
+            </p>
+        </div>
+
+        @if (Model.ShowRequestId)
+        {
+            <div class="rounded-xl border border-light-border bg-light-surface-subtle px-3 py-2 text-xs font-mono text-light-on-surface-muted dark:border-dark-border dark:bg-dark-surface-subtle dark:text-dark-on-surface-muted">
+                Request ID: <span class="font-semibold">@Model.RequestId</span>
+            </div>
+        }
+
+        <p class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">
+            Please try again in a few moments. If the issue persists, quote the request ID above to the IT Service Desk.
+        </p>
+
+        <div class="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row">
+            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-primary w-full sm:w-auto">
+                <span class="material-symbols-outlined text-[18px]">home</span>
+                <span>Return to Dashboard</span>
+            </a>
+            <button type="button" onclick="history.back()" class="btn btn-secondary w-full sm:w-auto">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                <span>Go Back</span>
+            </button>
+        </div>
+    </div>
+</main>

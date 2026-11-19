@@ -1,0 +1,85 @@
+@{
+    ViewData["Title"] = "System States";
+    ViewData["Breadcrumb"] = "System States";
+    ViewData["ActiveNav"] = "states";
+    ViewData["SkeletonRows"] = 6;
+    var emptyState = new EmptyStateModel
+    {
+        Icon = "group_add",
+        Title = "No students yet - Add your first student",
+        Message = "There are currently no matriculated students registered in this academic cohort. Add students individually or import a batch CSV file.",
+        ActionText = "Register Student",
+        ActionUrl = "Create",
+        ActionController = "Student"
+    };
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="page-title">Error, Empty &amp; Loading Skeletons</h2>
+            <p class="page-subtitle">Reference implementations for edge states used across the Lumina interface.</p>
+        </div>
+        <div class="tabs" data-tabs role="tablist" aria-label="System state previews">
+            <button type="button" data-tab-target="notfound" class="tab tab-active" role="tab" aria-selected="true">404 Not Found</button>
+            <button type="button" data-tab-target="empty" class="tab" role="tab" aria-selected="false">Empty Table</button>
+            <button type="button" data-tab-target="skeleton" class="tab" role="tab" aria-selected="false">Loading Skeletons</button>
+        </div>
+    </div>
+
+    <section data-tab-panel="notfound" class="flex min-h-[520px] items-center justify-center py-4">
+        <div class="w-full max-w-xl space-y-6 rounded-2xl border border-light-border bg-light-surface p-10 text-center shadow-xl dark:border-dark-border dark:bg-dark-surface">
+            <div class="mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-primary-container text-primary shadow-inner dark:bg-dark-surface-container dark:text-dark-on-surface">
+                <span class="material-symbols-outlined text-[54px]">travel_explore</span>
+            </div>
+            <div>
+                <span class="inline-flex rounded-full bg-primary-container px-3 py-1 text-label-sm font-bold uppercase tracking-wider text-primary dark:bg-dark-surface-container dark:text-dark-on-surface">Error 404</span>
+                <h3 class="mt-2 font-headline text-headline-xl font-bold text-light-on-surface dark:text-dark-on-surface">Academic Record Not Located</h3>
+                <p class="mx-auto mt-2 max-w-md text-body-md text-light-on-surface-muted dark:text-dark-on-surface-muted">
+                    The student profile, course catalog entry, or administrative URL you requested does not exist or may have been archived by the registrar.
+                </p>
+            </div>
+            <div class="rounded-xl border border-light-border bg-light-surface-subtle px-3 py-2 text-xs font-mono text-light-on-surface-muted dark:border-dark-border dark:bg-dark-surface-subtle dark:text-dark-on-surface-muted">
+                HTTP 404: /sims/academic-catalog/courses/CS-9999-NOT-FOUND
+            </div>
+            <div class="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row">
+                <a asp-controller="Home" asp-action="NotFound" class="btn btn-primary w-full sm:w-auto">
+                    <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+                    <span>Preview 404 Page</span>
+                </a>
+                <a asp-controller="Student" asp-action="Index" class="btn btn-secondary w-full sm:w-auto">Search Student Directory</a>
+            </div>
+        </div>
+    </section>
+
+    <section data-tab-panel="empty" class="hidden space-y-5">
+        <div>
+            <h3 class="font-headline text-headline-lg font-bold text-light-on-surface dark:text-dark-on-surface">Data Table Empty States</h3>
+            <p class="page-subtitle">Informative containers that guide staff toward registering their first records.</p>
+        </div>
+        <div class="overflow-hidden rounded-2xl border border-light-border bg-light-surface shadow-sm dark:border-dark-border dark:bg-dark-surface">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-light-border bg-light-surface-subtle p-4 dark:border-dark-border dark:bg-dark-surface-subtle">
+                <div class="flex items-center gap-3">
+                    <span class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Freshman Cohort 2027 (Pre-Admissions)</span>
+                    <span class="badge badge-neutral">0 Records</span>
+                </div>
+                <a asp-controller="Student" asp-action="Create" class="btn btn-primary px-3.5 py-1.5 text-label-sm">
+                    <span class="material-symbols-outlined text-[16px]">person_add</span>
+                    <span>Add Student</span>
+                </a>
+            </div>
+            <div class="p-6">
+                <partial name="Partials/_EmptyState" model="emptyState" />
+            </div>
+        </div>
+    </section>
+
+    <section data-tab-panel="skeleton" class="hidden space-y-5">
+        <div>
+            <h3 class="font-headline text-headline-lg font-bold text-light-on-surface dark:text-dark-on-surface">Asynchronous Loading Skeletons</h3>
+            <p class="page-subtitle">Placeholder structures that indicate progressive data loading without jarring layout shifts.</p>
+        </div>
+        <partial name="Partials/_SkeletonTable" />
+    </section>
+</div>
+

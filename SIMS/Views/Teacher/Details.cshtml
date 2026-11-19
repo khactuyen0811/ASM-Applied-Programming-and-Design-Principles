@@ -1,0 +1,99 @@
+@model TeacherDetails
+@{
+    ViewData["Title"] = "Teacher Profile";
+    ViewData["Breadcrumb"] = Model.FullName;
+    ViewData["ActiveNav"] = "teacher";
+    var courses = ViewData["Courses"] as IReadOnlyList<CourseListItem> ?? Array.Empty<CourseListItem>();
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <a asp-action="Index" class="btn btn-secondary w-fit">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span>Back to Faculty</span>
+        </a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+            <span>Edit Teacher</span>
+        </a>
+    </div>
+
+    <div class="card p-6">
+        <div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div class="flex items-center gap-4">
+                <span class="avatar avatar-initials h-16 w-16 text-xl">@UiFormat.Initials(Model.FullName)</span>
+                <div>
+                    <h2 class="font-headline text-headline-lg font-bold text-light-on-surface dark:text-dark-on-surface">@Model.FullName</h2>
+                    <p class="mt-1 font-mono text-body-md text-primary">@Model.TeacherCode</p>
+                    <p class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@Model.Department &bull; Joined @UiFormat.FormatDate(Model.CreatedAt)</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-3 text-body-sm sm:grid-cols-2">
+                <div>
+                    <div class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Email</div>
+                    <div class="font-semibold text-light-on-surface dark:text-dark-on-surface">@Model.Email</div>
+                </div>
+                <div>
+                    <div class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Phone</div>
+                    <div class="font-semibold text-light-on-surface dark:text-dark-on-surface">@(string.IsNullOrWhiteSpace(Model.Phone) ? "--" : Model.Phone)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Assigned Courses</h3>
+            <span class="badge badge-info">@courses.Count courses</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="table-lumina">
+                <thead>
+                    <tr>
+                        <th>Course Code</th>
+                        <th>Course Title</th>
+                        <th>Credits</th>
+                        <th>Enrolled / Cap</th>
+                        <th>Status</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (courses.Count == 0)
+                    {
+                        <tr><td colspan="6" class="text-center text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">No courses assigned to this teacher.</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var course in courses)
+                        {
+                            <tr>
+                                <td class="font-bold text-primary">@course.CourseCode</td>
+                                <td class="font-medium text-light-on-surface dark:text-dark-on-surface">@course.Name</td>
+                                <td class="tabular-nums">@course.Credits</td>
+                                <td class="font-bold tabular-nums">@course.EnrolledCount / @course.Capacity</td>
+                                <td><partial name="Partials/_StatusBadge" model="UiFormat.CourseStatusBadge(course.EnrolledCount, course.Capacity)" /></td>
+                                <td class="text-right">
+                                    <a asp-controller="Course" asp-action="Details" asp-route-id="@course.Id" class="text-label-md font-semibold text-primary hover:underline">Open Course</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="rounded-xl border border-error/30 bg-error-container/40 p-4">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <div class="text-label-md font-bold uppercase tracking-wide text-error">Danger Zone</div>
+                <p class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Removing this teacher unassigns them from their courses.</p>
+            </div>
+            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" data-confirm="Delete this teacher record?">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger">Delete Teacher</button>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,159 @@
+﻿@model PagedResult<StudentListItem>
+@{
+    ViewData["Title"] = "Students";
+    ViewData["Breadcrumb"] = "Student Directory";
+    ViewData["ActiveNav"] = "student";
+
+    var search = ViewData["Search"] as string;
+    var selectedProgram = ViewData["Program"] as string;
+    var selectedStatus = ViewData["Status"] as StudentStatus?;
+    var programs = ViewData["Programs"] as IReadOnlyList<string> ?? Array.Empty<string>();
+    var isStaff = User.IsInRole("Admin") || User.IsInRole("Lecturer");
+    var isAdmin = User.IsInRole("Admin");
+
+    var routeValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    if (!string.IsNullOrWhiteSpace(search)) { routeValues["search"] = search!; }
+    if (!string.IsNullOrWhiteSpace(selectedProgram)) { routeValues["program"] = selectedProgram!; }
+    if (selectedStatus.HasValue) { routeValues["status"] = ((int)selectedStatus.Value).ToString(CultureInfo.InvariantCulture); }
+
+    var pagination = new PaginationModel
+    {
+        Page = Model.Page,
+        PageSize = Model.PageSize,
+        TotalCount = Model.TotalCount,
+        Action = "Index",
+        Controller = "Student",
+        RouteValues = routeValues
+    };
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="page-title">Student Directory</h2>
+            <p class="page-subtitle">Search, filter and manage matriculated student records across all programs.</p>
+        </div>
+        @if (isStaff)
+        {
+            <a asp-action="Create" class="btn btn-primary">
+                <span class="material-symbols-outlined text-[18px]">person_add</span>
+                <span>Register Student</span>
+            </a>
+        }
+    </div>
+
+    <form asp-action="Index" method="get" class="card p-4">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-end">
+            <div class="flex-1">
+                <label for="studentSearch" class="label">Search</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-light-on-surface-muted dark:text-dark-on-surface-muted">search</span>
+                    <input id="studentSearch" name="search" value="@search" type="search" placeholder="Name, student code or email..." class="input pl-10" />
+                </div>
+            </div>
+            <div class="lg:w-56">
+                <label for="studentProgram" class="label">Program</label>
+                <select id="studentProgram" name="program" class="select">
+                    <option value="">All Programs</option>
+                    @foreach (var program in programs)
+                    {
+                        <option value="@program" selected="@(program == selectedProgram)">@program</option>
+                    }
+                </select>
+            </div>
+            <div class="lg:w-48">
+                <label for="studentStatus" class="label">Status</label>
+                <select id="studentStatus" name="status" class="select">
+                    <option value="">All Statuses</option>
+                    <option value="1" selected="@(selectedStatus == StudentStatus.Active)">Active</option>
+                    <option value="2" selected="@(selectedStatus == StudentStatus.Suspended)">Suspended</option>
+                    <option value="3" selected="@(selectedStatus == StudentStatus.Graduated)">Graduated</option>
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <span class="material-symbols-outlined text-[18px]">filter_alt</span>
+                    <span>Apply</span>
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+
+    <div class="overflow-hidden rounded-xl border border-light-border bg-light-surface shadow-sm dark:border-dark-border dark:bg-dark-surface">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-light-border px-6 py-4 dark:border-dark-border">
+            <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Students</h3>
+            <span class="badge badge-neutral">@Model.TotalCount records</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="table-lumina">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Email</th>
+                        <th>Program</th>
+                        <th>Year</th>
+                        <th>Status</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6">
+                                @await Html.PartialAsync("Partials/_EmptyState", new EmptyStateModel
+                                {
+                                    Icon = "group_add",
+                                    Title = "No students found",
+                                    Message = "No student records match the current filters. Register a new student or adjust your search criteria.",
+                                    ActionText = isStaff ? "Register Student" : null,
+                                    ActionUrl = isStaff ? "Create" : null,
+                                    ActionController = "Student"
+                                })
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var student in Model.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <span class="avatar avatar-initials h-9 w-9 text-[12px]">@UiFormat.Initials(student.FullName)</span>
+                                        <div class="min-w-0">
+                                            <div class="truncate font-semibold text-light-on-surface dark:text-dark-on-surface">@student.FullName</div>
+                                            <div class="truncate font-mono text-body-sm text-primary">@student.StudentCode</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-light-on-surface dark:text-dark-on-surface">@student.Email</td>
+                                <td class="text-light-on-surface dark:text-dark-on-surface">@student.Program</td>
+                                <td class="tabular-nums">@student.EnrollmentYear</td>
+                                <td><partial name="Partials/_StatusBadge" model="UiFormat.StudentStatusBadge(student.Status)" /></td>
+                                <td class="text-right">
+                                    <div class="inline-flex items-center gap-2">
+                                        <a asp-action="Details" asp-route-id="@student.Id" class="text-label-md font-semibold text-primary hover:underline">Details</a>
+                                        @if (isStaff)
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@student.Id" class="text-label-md font-semibold text-accent hover:underline">Edit</a>
+                                        }
+                                        @if (isAdmin)
+                                        {
+                                            <form asp-action="Delete" asp-route-id="@student.Id" method="post" class="inline" data-confirm="Delete this student record permanently?">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="text-label-md font-semibold text-error hover:underline">Delete</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <partial name="Partials/_Pagination" model="pagination" />
+    </div>
+</div>

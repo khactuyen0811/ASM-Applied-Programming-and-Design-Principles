@@ -1,0 +1,43 @@
+@{
+    var messages = new List<(string Text, string Tone, string Icon, string Title)>();
+    var success = TempData["Success"] as string;
+    var error = TempData["Error"] as string;
+    var warning = TempData["Warning"] as string;
+    var info = TempData["Info"] as string;
+
+    if (!string.IsNullOrWhiteSpace(success))
+    {
+        messages.Add((success!, "success", "check_circle", "Success"));
+    }
+    if (!string.IsNullOrWhiteSpace(error))
+    {
+        messages.Add((error!, "error", "error", "Action required"));
+    }
+    if (!string.IsNullOrWhiteSpace(warning))
+    {
+        messages.Add((warning!, "warning", "warning", "Please review"));
+    }
+    if (!string.IsNullOrWhiteSpace(info))
+    {
+        messages.Add((info!, "info", "info", "Information"));
+    }
+}
+
+@if (messages.Count > 0)
+{
+    <div class="fixed right-4 top-4 z-50 flex w-full max-w-sm flex-col gap-3 print-hide" aria-live="polite" aria-atomic="true">
+        @foreach (var message in messages)
+        {
+            <div data-toast class="toast toast-@message.Tone">
+                <span class="material-symbols-outlined mt-0.5 shrink-0 text-[20px]">@message.Icon</span>
+                <div class="min-w-0 flex-1">
+                    <div class="text-label-md font-semibold">@message.Title</div>
+                    <div class="mt-0.5 text-body-sm">@message.Text</div>
+                </div>
+                <button type="button" data-toast-close class="shrink-0 rounded p-1 transition-colors hover:bg-black/5" aria-label="Dismiss notification">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+        }
+    </div>
+}

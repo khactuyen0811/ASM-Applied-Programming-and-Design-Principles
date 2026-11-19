@@ -1,0 +1,468 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Student Portal Preview · BTEC FPT</title>
+    <link rel="stylesheet" href="~/lumina/css/fonts.css" />
+    <link rel="stylesheet" href="~/lumina/css/fap-preview.css" />
+</head>
+<body class="fap-body">
+    <div class="preview-strip">
+        <span class="material-symbols-outlined" style="font-size:15px">visibility</span>
+        Student portal interface preview · Inspired by FAP ·
+        <a href="/Dashboard">Back to current interface</a>
+    </div>
+
+    <header class="fap-topbar">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+            <button class="icon-button menu-toggle" type="button" data-nav-toggle aria-label="Open menu">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <a class="fap-brand" href="/Preview">
+                <span class="brand-mark"><span class="material-symbols-outlined">school</span></span>
+                <span>
+                    <span class="brand-title">BTEC FPT</span>
+                    <span class="brand-sub">Student Portal</span>
+                </span>
+            </a>
+        </div>
+
+        <div class="top-actions">
+            <span class="campus-pill">
+                <span class="material-symbols-outlined">location_on</span>
+                Hanoi Campus
+            </span>
+            <button class="icon-button" type="button" aria-label="Notifications">
+                <span class="material-symbols-outlined">notifications</span>
+                <span class="notification-dot"></span>
+            </button>
+            <div class="user-chip">
+                <span class="avatar">NA</span>
+                <span class="user-chip-copy">
+                    <span class="user-name">Nguyen Van An</span>
+                    <span class="user-meta">Student ID: SE2024001</span>
+                </span>
+                <span class="material-symbols-outlined">expand_more</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="sidebar-backdrop" data-nav-close></div>
+
+    <div class="fap-shell">
+        <aside class="fap-sidebar">
+            <nav class="nav-section" aria-label="Overview">
+                <div class="nav-label">Overview</div>
+                <a class="nav-link active" href="/Preview">
+                    <span class="material-symbols-outlined">home</span>
+                    Home
+                </a>
+                <a class="nav-link" href="#">
+                    <span class="material-symbols-outlined">campaign</span>
+                    Announcements
+                    <span class="nav-badge">3</span>
+                </a>
+            </nav>
+
+            <nav class="nav-section" aria-label="Academic information">
+                <div class="nav-label">Academic Information</div>
+                <a class="nav-link" href="#">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    Timetable
+                </a>
+                <a class="nav-link" href="#">
+                    <span class="material-symbols-outlined">event_note</span>
+                    Exam Schedule
+                </a>
+                <a class="nav-link" href="#">
+                    <span class="material-symbols-outlined">fact_check</span>
+                    Attendance
+                </a>
+                <a class="nav-link" href="#">
+                    <span class="material-symbols-outlined">assessment</span>
+                    Grades
+                </a>
+            </nav>
+
+            <nav class="nav-section" aria-label="Documents and learning">
+                <div class="nav-label">Documents &amp; Learning</div>
+                <a class="nav-link" href="#">
+                    <span class="material-symbols-outlined">folder_open</span>
+                    Course Materials
+                </a>
+                <a class="nav-link" href="#">
+                    <span class="material-symbols-outlined">menu_book</span>
+                    Program Curriculum
+                </a>
+            </nav>
+
+            <nav class="nav-section" aria-label="Student services">
+                <div class="nav-label">Student Services</div>
+                <a class="nav-link" href="#">
+                    <span class="material-symbols-outlined">app_registration</span>
+                    Course Registration
+                </a>
+                <a class="nav-link" href="#">
+                    <span class="material-symbols-outlined">support_agent</span>
+                    Support Requests
+                </a>
+                <a class="nav-link" href="#">
+                    <span class="material-symbols-outlined">payments</span>
+                    Tuition &amp; Payments
+                </a>
+            </nav>
+
+            <nav class="nav-section" aria-label="Account">
+                <div class="nav-label">Account</div>
+                <a class="nav-link" href="#">
+                    <span class="material-symbols-outlined">person</span>
+                    Personal Profile
+                </a>
+                <a class="nav-link" href="#">
+                    <span class="material-symbols-outlined">lock_reset</span>
+                    Change Password
+                </a>
+                <a class="nav-link" href="/Login">
+                    <span class="material-symbols-outlined">logout</span>
+                    Sign Out
+                </a>
+            </nav>
+
+            <div class="sidebar-help">
+                <h4>Need help?</h4>
+                <p>The Student Affairs Office is available from 8:00 AM – 5:00 PM, Monday to Friday.</p>
+                <a href="#">
+                    <span class="material-symbols-outlined">support_agent</span>
+                    Contact us
+                </a>
+            </div>
+        </aside>
+
+        <main class="fap-main">
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">Fall 2026 Semester · Week 12</p>
+                    <h1 class="page-title">Welcome back, Nguyen Van An</h1>
+                    <p class="page-sub">Have a productive day. Here is an overview of your activity.</p>
+                </div>
+                <div class="head-actions">
+                    <a class="btn btn-primary" href="#">
+                        <span class="material-symbols-outlined">calendar_month</span>
+                        View Timetable
+                    </a>
+                    <a class="btn btn-outline" href="#">
+                        <span class="material-symbols-outlined">download</span>
+                        Download App
+                    </a>
+                </div>
+            </div>
+
+            <section class="hero">
+                <div class="hero-copy">
+                    <span class="hero-tag">
+                        <span class="material-symbols-outlined">school</span>
+                        Semester in progress
+                    </span>
+                    <h2>You have 3 new announcements and 2 deadlines to handle this week.</h2>
+                    <p>Complete your course registration by Nov 30 to stay on track. Check the final exam schedule and newly updated course materials.</p>
+                    <div class="hero-meta">
+                        <span><span class="material-symbols-outlined">calendar_month</span> Fall 2026</span>
+                        <span><span class="material-symbols-outlined">location_on</span> Hanoi Campus</span>
+                        <span><span class="material-symbols-outlined">schedule</span> Updated 5 minutes ago</span>
+                    </div>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-label">GPA</span>
+                        <span class="stat-value">3.42</span>
+                        <span class="stat-sub">Excellent standing</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Credits</span>
+                        <span class="stat-value">18/21</span>
+                        <span class="stat-sub">Fall 2026</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Attendance</span>
+                        <span class="stat-value">96%</span>
+                        <span class="stat-sub">12 sessions attended</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Courses</span>
+                        <span class="stat-value">4</span>
+                        <span class="stat-sub">Currently enrolled</span>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid-main">
+                <section class="card">
+                    <div class="card-head">
+                        <h3 class="card-title">
+                            <span class="material-symbols-outlined">campaign</span>
+                            New Announcements
+                        </h3>
+                        <a class="card-link" href="#">View all <span class="material-symbols-outlined">chevron_right</span></a>
+                    </div>
+                    <div class="card-body">
+                        <div class="notice-list">
+                            <article class="notice-item">
+                                <div class="notice-date"><strong>30</strong>Nov</div>
+                                <div class="notice-copy">
+                                    <h4>Spring 2027 Course Registration</h4>
+                                    <p>Course registration is open until 5:00 PM on Nov 30, 2026. Please review your program curriculum carefully before registering.</p>
+                                    <div class="notice-meta">
+                                        <span class="pill pill-orange"><span class="material-symbols-outlined">priority_high</span> Important</span>
+                                        <span class="pill pill-gray">Registrar's Office</span>
+                                    </div>
+                                </div>
+                            </article>
+                            <article class="notice-item">
+                                <div class="notice-date"><strong>20</strong>Nov</div>
+                                <div class="notice-copy">
+                                    <h4>Fall 2026 Final Exam Schedule Updated</h4>
+                                    <p>Check your exam rooms, sessions, and exam formats under Exam Schedule. Please arrive 15 minutes before your exam.</p>
+                                    <div class="notice-meta">
+                                        <span class="pill pill-blue">Academic Affairs</span>
+                                        <span class="pill pill-gray">Read</span>
+                                    </div>
+                                </div>
+                            </article>
+                            <article class="notice-item">
+                                <div class="notice-date"><strong>25</strong>Nov</div>
+                                <div class="notice-copy">
+                                    <h4>Workshop: CV Writing and Interview Skills</h4>
+                                    <p>Join the workshop at Hall A at 2:00 PM on Nov 25. Register in advance under Support Requests.</p>
+                                    <div class="notice-meta">
+                                        <span class="pill pill-green">Event</span>
+                                        <span class="pill pill-gray">Career Center</span>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-head">
+                        <h3 class="card-title">
+                            <span class="material-symbols-outlined">apps</span>
+                            Quick Access
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-grid">
+                            <a class="quick-item" href="#">
+                                <span class="quick-icon"><span class="material-symbols-outlined">calendar_month</span></span>
+                                <strong>Timetable</strong>
+                                <span>View your weekly class schedule</span>
+                            </a>
+                            <a class="quick-item orange" href="#">
+                                <span class="quick-icon"><span class="material-symbols-outlined">event_note</span></span>
+                                <strong>Exam Schedule</strong>
+                                <span>Find exam sessions and rooms</span>
+                            </a>
+                            <a class="quick-item green" href="#">
+                                <span class="quick-icon"><span class="material-symbols-outlined">assessment</span></span>
+                                <strong>Grades</strong>
+                                <span>Component scores and GPA</span>
+                            </a>
+                            <a class="quick-item amber" href="#">
+                                <span class="quick-icon"><span class="material-symbols-outlined">folder_open</span></span>
+                                <strong>Materials</strong>
+                                <span>Slides, assignments, syllabi</span>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="grid-2">
+                <section class="card">
+                    <div class="card-head">
+                        <h3 class="card-title">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                            This Week's Timetable
+                        </h3>
+                        <a class="card-link" href="#">View details <span class="material-symbols-outlined">chevron_right</span></a>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="schedule">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Time</th>
+                                    <th>Course</th>
+                                    <th>Room</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Monday</td>
+                                    <td>07:30 – 10:00</td>
+                                    <td>
+                                        <span class="course-code">PRN211</span>
+                                        <span class="course-name">C# and .NET Programming</span>
+                                    </td>
+                                    <td>A-302</td>
+                                    <td><span class="status"><span class="material-symbols-outlined">check_circle</span> Attended</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Tuesday</td>
+                                    <td>12:45 – 15:15</td>
+                                    <td>
+                                        <span class="course-code">SWD392</span>
+                                        <span class="course-name">Software Architecture</span>
+                                    </td>
+                                    <td>B-201</td>
+                                    <td><span class="status"><span class="material-symbols-outlined">check_circle</span> Attended</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Thursday</td>
+                                    <td>07:30 – 10:00</td>
+                                    <td>
+                                        <span class="course-code">DBI202</span>
+                                        <span class="course-name">Database Systems</span>
+                                    </td>
+                                    <td>A-105</td>
+                                    <td><span class="status warning"><span class="material-symbols-outlined">schedule</span> Upcoming</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Friday</td>
+                                    <td>12:45 – 15:15</td>
+                                    <td>
+                                        <span class="course-code">MAS291</span>
+                                        <span class="course-name">Probability and Statistics</span>
+                                    </td>
+                                    <td>C-210</td>
+                                    <td><span class="status warning"><span class="material-symbols-outlined">schedule</span> Upcoming</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-head">
+                        <h3 class="card-title">
+                            <span class="material-symbols-outlined">event_note</span>
+                            Deadlines to Note
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="deadline-list">
+                            <div class="deadline-item">
+                                <span class="deadline-icon"><span class="material-symbols-outlined">app_registration</span></span>
+                                <div class="deadline-copy">
+                                    <strong>Spring 2027 Course Registration</strong>
+                                    <span>12 days left · Due Nov 30, 2026</span>
+                                </div>
+                            </div>
+                            <div class="deadline-item">
+                                <span class="deadline-icon"><span class="material-symbols-outlined">fact_check</span></span>
+                                <div class="deadline-copy">
+                                    <strong>Fall 2026 Course Survey</strong>
+                                    <span>5 days left · Due Nov 23, 2026</span>
+                                </div>
+                            </div>
+                            <div class="deadline-item">
+                                <span class="deadline-icon"><span class="material-symbols-outlined">payments</span></span>
+                                <div class="deadline-copy">
+                                    <strong>Tuition Payment – Installment 2</strong>
+                                    <span>9 days left · Due Nov 27, 2026</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <section class="card">
+                <div class="card-head">
+                    <h3 class="card-title">
+                        <span class="material-symbols-outlined">folder_open</span>
+                        New Course Materials
+                    </h3>
+                    <a class="card-link" href="#">All materials <span class="material-symbols-outlined">chevron_right</span></a>
+                </div>
+                <div class="card-body">
+                    <div class="material-grid">
+                        <article class="material-card">
+                            <div class="material-top">
+                                <span class="file-badge">PDF</span>
+                                <span class="pill pill-blue">PRN211</span>
+                            </div>
+                            <div>
+                                <h4>Lecture Slides: LINQ and Entity Framework</h4>
+                                <p>Updated by lecturer · Nov 18, 2026</p>
+                            </div>
+                            <div class="material-meta">
+                                <span>4.2 MB</span>
+                                <a class="download-link" href="#"><span class="material-symbols-outlined">download</span> Download</a>
+                            </div>
+                        </article>
+                        <article class="material-card">
+                            <div class="material-top">
+                                <span class="file-badge pptx">PPTX</span>
+                                <span class="pill pill-orange">SWD392</span>
+                            </div>
+                            <div>
+                                <h4>Clean Architecture in .NET</h4>
+                                <p>Updated by lecturer · Nov 17, 2026</p>
+                            </div>
+                            <div class="material-meta">
+                                <span>6.8 MB</span>
+                                <a class="download-link" href="#"><span class="material-symbols-outlined">download</span> Download</a>
+                            </div>
+                        </article>
+                        <article class="material-card">
+                            <div class="material-top">
+                                <span class="file-badge zip">ZIP</span>
+                                <span class="pill pill-green">DBI202</span>
+                            </div>
+                            <div>
+                                <h4>Group Assignment: Database Design</h4>
+                                <p>Updated by lecturer · Nov 15, 2026</p>
+                            </div>
+                            <div class="material-meta">
+                                <span>12.5 MB</span>
+                                <a class="download-link" href="#"><span class="material-symbols-outlined">download</span> Download</a>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="fap-footer">
+        <span><strong>BTEC FPT Student Portal</strong> · Interface preview</span>
+        <span>Support: 024 7300 1886 · support@btec.fpt.edu.vn</span>
+    </footer>
+
+    <script>
+        (function () {
+            var body = document.body;
+            var toggle = document.querySelector('[data-nav-toggle]');
+            var close = document.querySelector('[data-nav-close]');
+
+            if (toggle) {
+                toggle.addEventListener('click', function () {
+                    body.classList.toggle('nav-open');
+                });
+            }
+
+            if (close) {
+                close.addEventListener('click', function () {
+                    body.classList.remove('nav-open');
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

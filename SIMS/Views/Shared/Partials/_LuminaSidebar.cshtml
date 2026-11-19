@@ -1,0 +1,165 @@
+﻿@{
+    var displayName = User.FindFirst("DisplayName")?.Value;
+    if (string.IsNullOrWhiteSpace(displayName))
+    {
+        displayName = User.Identity?.Name ?? "SIMS User";
+    }
+
+    var initials = ViewData["UserInitials"] as string;
+    if (string.IsNullOrWhiteSpace(initials))
+    {
+        initials = UiFormat.Initials(displayName);
+    }
+
+    var roleLabel = User.IsInRole("Admin")
+        ? "System Administrator"
+        : User.IsInRole("Lecturer")
+            ? "Faculty Member"
+            : User.IsInRole("Student")
+                ? "Student Self-Service"
+                : "Institutional User";
+
+    var active = ViewData["ActiveNav"] as string;
+    if (string.IsNullOrWhiteSpace(active))
+    {
+        active = ViewContext.RouteData.Values["controller"]?.ToString();
+    }
+    active = active?.ToLowerInvariant();
+
+    Func<string, bool> isActive = key => string.Equals(active, key, StringComparison.OrdinalIgnoreCase);
+}
+
+<div data-sidebar-backdrop class="fixed inset-0 z-40 hidden bg-black/50 backdrop-blur-sm lg:hidden"></div>
+
+<aside id="lumina-sidebar" data-sidebar class="fixed inset-y-0 left-0 z-50 flex w-[260px] shrink-0 -translate-x-full flex-col justify-between border-r border-primary-hover bg-primary text-white transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0">
+    <div>
+        <div class="flex h-16 items-center gap-3 border-b border-white/10 bg-primary-hover/50 px-6">
+            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent shadow-sm">
+                <span class="material-symbols-outlined text-[22px] text-white">school</span>
+            </div>
+            <div class="min-w-0">
+                <span class="block truncate font-headline text-sm font-bold leading-tight tracking-tight">Lumina University</span>
+                <span class="block truncate text-[11px] text-blue-200">Student Information Management System</span>
+            </div>
+        </div>
+
+        <div class="p-3">
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-blue-300/80">Core Portals</div>
+                <nav class="space-y-1" aria-label="Core navigation">
+                    <a asp-controller="Dashboard" asp-action="Index" class="sidebar-link @(isActive("dashboard") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">dashboard</span>
+                        <span>Dashboard</span>
+                    </a>
+                </nav>
+
+                <div class="px-3 pb-2 pt-6 text-[11px] font-semibold uppercase tracking-wider text-blue-300/80">Management</div>
+                <nav class="space-y-1" aria-label="Management navigation">
+                    <a asp-controller="Student" asp-action="Index" class="sidebar-link @(isActive("student") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">groups</span>
+                        <span>Students</span>
+                    </a>
+                    <a asp-controller="Course" asp-action="Index" class="sidebar-link @(isActive("course") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">menu_book</span>
+                        <span>Courses</span>
+                    </a>
+                    <a asp-controller="Enrollment" asp-action="Index" class="sidebar-link @(isActive("enrollment") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">how_to_reg</span>
+                        <span>Enrollments</span>
+                    </a>
+                    <a asp-controller="Teacher" asp-action="Index" class="sidebar-link @(isActive("teacher") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">badge</span>
+                        <span>Teachers</span>
+                    </a>
+                    <a asp-controller="Users" asp-action="Index" class="sidebar-link @(isActive("users") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+                        <span>Users &amp; Roles</span>
+                    </a>
+                    <a asp-controller="Csv" asp-action="Index" class="sidebar-link @(isActive("csv") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">cloud_sync</span>
+                        <span>CSV Import / Export</span>
+                    </a>
+                    <a asp-controller="Home" asp-action="States" class="sidebar-link @(isActive("states") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">layers</span>
+                        <span>System States</span>
+                    </a>
+                </nav>
+
+                <div class="px-3 pb-2 pt-6 text-[11px] font-semibold uppercase tracking-wider text-blue-300/80">Account</div>
+                <nav class="space-y-1" aria-label="Account navigation">
+                    <a asp-controller="Profile" asp-action="Index" class="sidebar-link @(isActive("profile") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">person</span>
+                        <span>Profile</span>
+                    </a>
+                </nav>
+            }
+            else if (User.IsInRole("Lecturer"))
+            {
+                <div class="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-blue-300/80">Faculty Portal</div>
+                <nav class="space-y-1" aria-label="Faculty navigation">
+                    <a asp-controller="Dashboard" asp-action="Faculty" class="sidebar-link @(isActive("dashboard") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">dashboard</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a asp-controller="Student" asp-action="Index" class="sidebar-link @(isActive("student") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">groups</span>
+                        <span>Students</span>
+                    </a>
+                    <a asp-controller="Course" asp-action="Index" class="sidebar-link @(isActive("course") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">menu_book</span>
+                        <span>Courses</span>
+                    </a>
+                    <a asp-controller="Enrollment" asp-action="Index" class="sidebar-link @(isActive("enrollment") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">how_to_reg</span>
+                        <span>Enrollments</span>
+                    </a>
+                    <a asp-controller="Profile" asp-action="Index" class="sidebar-link @(isActive("profile") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">person</span>
+                        <span>Profile</span>
+                    </a>
+                </nav>
+            }
+            else
+            {
+                <div class="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-blue-300/80">Student Portal</div>
+                <nav class="space-y-1" aria-label="Student navigation">
+                    <a asp-controller="Dashboard" asp-action="Student" class="sidebar-link @(isActive("dashboard") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">dashboard</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a asp-controller="Enrollment" asp-action="Index" class="sidebar-link @(isActive("enrollment") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">how_to_reg</span>
+                        <span>Course Registration</span>
+                    </a>
+                    <a asp-controller="Course" asp-action="Index" class="sidebar-link @(isActive("course") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">menu_book</span>
+                        <span>Course Catalog</span>
+                    </a>
+                    <a asp-controller="Profile" asp-action="Index" class="sidebar-link @(isActive("profile") ? "sidebar-link-active" : string.Empty)">
+                        <span class="material-symbols-outlined text-[20px]">person</span>
+                        <span>My Profile</span>
+                    </a>
+                </nav>
+            }
+        </div>
+    </div>
+
+    <div class="border-t border-white/10 bg-primary-hover/30 p-3">
+        <a asp-controller="Profile" asp-action="Index" class="flex items-center gap-3 rounded-lg p-2 transition-colors duration-state-change hover:bg-white/10">
+            <div class="avatar avatar-initials h-9 w-9 text-sm">@initials</div>
+            <div class="min-w-0">
+                <div class="truncate text-label-md font-semibold text-white">@displayName</div>
+                <div class="truncate text-[11px] text-blue-200">@roleLabel</div>
+            </div>
+        </a>
+        <form asp-controller="Login" asp-action="Logout" method="post" class="mt-2">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-body-sm text-blue-100 transition-colors duration-state-change hover:bg-white/10">
+                <span class="material-symbols-outlined text-[18px]">logout</span>
+                <span>Sign out</span>
+            </button>
+        </form>
+    </div>
+</aside>
+

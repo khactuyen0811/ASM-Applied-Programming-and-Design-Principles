@@ -1,0 +1,102 @@
+@model SIMS.Models.Lumina.PaginationModel
+@{
+    var routeValues = new Dictionary<string, string>(Model.RouteValues, StringComparer.OrdinalIgnoreCase);
+    routeValues.Remove("page");
+
+    var pageSizeOptions = ViewData["PageSizes"] as int[] ?? Array.Empty<int>();
+
+    var pages = new List<int>();
+    if (Model.TotalPages <= 7)
+    {
+        pages.AddRange(Enumerable.Range(1, Model.TotalPages));
+    }
+    else
+    {
+        pages.Add(1);
+        var start = Math.Max(2, Model.Page - 1);
+        var end = Math.Min(Model.TotalPages - 1, Model.Page + 1);
+        if (start > 2)
+        {
+            pages.Add(-1);
+        }
+        pages.AddRange(Enumerable.Range(start, Math.Max(0, end - start + 1)));
+        if (end < Model.TotalPages - 1)
+        {
+            pages.Add(-1);
+        }
+        pages.Add(Model.TotalPages);
+    }
+}
+
+<nav class="flex flex-col gap-3 border-t border-light-border px-4 py-3 text-body-sm text-light-on-surface-muted sm:flex-row sm:items-center sm:justify-between dark:border-dark-border dark:text-dark-on-surface-muted" aria-label="Pagination">
+    <div class="flex flex-wrap items-center gap-3">
+        <span>Showing <span class="font-semibold text-light-on-surface tabular-nums dark:text-dark-on-surface">@(Model.FromItem)-@(Model.ToItem)</span> of <span class="font-semibold text-light-on-surface tabular-nums dark:text-dark-on-surface">@Model.TotalCount</span></span>
+        @if (pageSizeOptions.Length > 0)
+        {
+            <span class="hidden h-4 border-l border-light-border sm:block dark:border-dark-border"></span>
+            <div class="flex items-center gap-1">
+                <span>Rows:</span>
+                @foreach (var size in pageSizeOptions)
+                {
+                    var sizeRoute = new Dictionary<string, string>(routeValues, StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["pageSize"] = size.ToString(CultureInfo.InvariantCulture)
+                    };
+                    <a asp-action="@Model.Action" asp-controller="@Model.Controller" asp-route-page="1" asp-all-route-data="sizeRoute"
+                       class="rounded px-1.5 py-0.5 font-semibold tabular-nums transition-colors @(size == Model.PageSize ? "bg-primary-container text-primary dark:bg-dark-surface-container dark:text-dark-on-surface" : "hover:bg-light-surface-container dark:hover:bg-dark-surface-container")">@size</a>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="flex flex-wrap items-center gap-1">
+        @if (Model.HasPrevious)
+        {
+            <a asp-action="@Model.Action" asp-controller="@Model.Controller" asp-route-page="@(Model.Page - 1)" asp-all-route-data="routeValues"
+               class="inline-flex h-8 items-center gap-1 rounded-lg border border-light-border px-2.5 font-semibold text-light-on-surface transition-colors hover:bg-light-surface-container dark:border-dark-border dark:text-dark-on-surface dark:hover:bg-dark-surface-container">
+                <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                <span class="hidden sm:inline">Previous</span>
+            </a>
+        }
+        else
+        {
+            <span class="inline-flex h-8 cursor-not-allowed items-center gap-1 rounded-lg border border-light-border px-2.5 font-semibold opacity-50 dark:border-dark-border">
+                <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                <span class="hidden sm:inline">Previous</span>
+            </span>
+        }
+
+        @foreach (var page in pages)
+        {
+            if (page == -1)
+            {
+                <span class="px-1.5 text-light-on-surface-muted dark:text-dark-on-surface-muted">&hellip;</span>
+            }
+            else if (page == Model.Page)
+            {
+                <span aria-current="page" class="inline-flex h-8 min-w-8 items-center justify-center rounded-lg bg-primary px-2 font-semibold text-on-primary tabular-nums shadow-sm">@(page)</span>
+            }
+            else
+            {
+                <a asp-action="@Model.Action" asp-controller="@Model.Controller" asp-route-page="@(page)" asp-all-route-data="routeValues"
+                   class="inline-flex h-8 min-w-8 items-center justify-center rounded-lg border border-light-border px-2 font-semibold text-light-on-surface tabular-nums transition-colors hover:bg-light-surface-container dark:border-dark-border dark:text-dark-on-surface dark:hover:bg-dark-surface-container">@(page)</a>
+            }
+        }
+
+        @if (Model.HasNext)
+        {
+            <a asp-action="@Model.Action" asp-controller="@Model.Controller" asp-route-page="@(Model.Page + 1)" asp-all-route-data="routeValues"
+               class="inline-flex h-8 items-center gap-1 rounded-lg border border-light-border px-2.5 font-semibold text-light-on-surface transition-colors hover:bg-light-surface-container dark:border-dark-border dark:text-dark-on-surface dark:hover:bg-dark-surface-container">
+                <span class="hidden sm:inline">Next</span>
+                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+            </a>
+        }
+        else
+        {
+            <span class="inline-flex h-8 cursor-not-allowed items-center gap-1 rounded-lg border border-light-border px-2.5 font-semibold opacity-50 dark:border-dark-border">
+                <span class="hidden sm:inline">Next</span>
+                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+            </span>
+        }
+    </div>
+</nav>

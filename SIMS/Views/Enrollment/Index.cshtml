@@ -1,0 +1,231 @@
+@model IReadOnlyList<EnrollmentListItem>
+@{
+    var isStudent = User.IsInRole("Student");
+    ViewData["Title"] = isStudent ? "Course Registration" : "Enrollments";
+    ViewData["Breadcrumb"] = isStudent ? "Course Registration" : "Enrollment Desk";
+    ViewData["ActiveNav"] = "enrollment";
+
+    var courses = ViewData["Courses"] as IReadOnlyList<CourseListItem> ?? Array.Empty<CourseListItem>();
+    var selectedStudent = ViewData["SelectedStudent"] as StudentDetails;
+    var selectedId = ViewData["SelectedStudentId"] as int?;
+    var students = ViewData["Students"] as PagedResult<StudentListItem>;
+    var search = ViewData["Search"] as string;
+
+    var enrolledIds = Model.Select(e => e.CourseId).ToHashSet();
+    var availableCourses = courses.Where(c => !enrolledIds.Contains(c.Id)).ToList();
+    var enrolledCredits = Model.Sum(e => courses.FirstOrDefault(c => c.Id == e.CourseId)?.Credits ?? 0);
+    var earnedCredits = Model.Where(e => e.Grade.HasValue && e.Grade.Value >= 50).Sum(e => courses.FirstOrDefault(c => c.Id == e.CourseId)?.Credits ?? 0);
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="page-title">@(isStudent ? "Course Registration" : "Enrollment Desk")</h2>
+            <p class="page-subtitle">
+                @(isStudent
+                    ? "Review your registered courses and enroll in available sections."
+                    : "Select a student to review their registrations and assign course sections.")
+            </p>
+        </div>
+        @if (!isStudent)
+        {
+            <a asp-controller="Student" asp-action="Index" class="btn btn-secondary">
+                <span class="material-symbols-outlined text-[18px]">groups</span>
+                <span>Student Directory</span>
+            </a>
+        }
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 @(isStudent ? string.Empty : "xl:grid-cols-3")">
+        @if (!isStudent)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Select Student</h3>
+                    <span class="badge badge-neutral">@(students?.TotalCount ?? 0)</span>
+                </div>
+                <div class="border-b border-light-border p-4 dark:border-dark-border">
+                    <form asp-action="Index" method="get" class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-light-on-surface-muted dark:text-dark-on-surface-muted">search</span>
+                        <input type="search" name="search" value="@search" placeholder="Search students..." class="input pl-10" />
+                    </form>
+                </div>
+                <div class="max-h-[460px] divide-y divide-light-border overflow-y-auto dark:divide-dark-border">
+                    @if (students is null || students.Items.Count == 0)
+                    {
+                        <p class="p-4 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">No students found.</p>
+                    }
+                    else
+                    {
+                        @foreach (var student in students.Items)
+                        {
+                            <a asp-action="Index" asp-route-studentId="@student.Id" asp-route-search="@search"
+                               class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-light-surface-subtle dark:hover:bg-dark-surface-subtle @(selectedId == student.Id ? "bg-primary-container/40" : string.Empty)">
+                                <span class="avatar avatar-initials h-8 w-8 text-[11px]">@UiFormat.Initials(student.FullName)</span>
+                                <div class="min-w-0 flex-1">
+                                    <div class="truncate text-body-sm font-semibold text-light-on-surface dark:text-dark-on-surface">@student.FullName</div>
+                                    <div class="truncate font-mono text-xs text-light-on-surface-muted dark:text-dark-on-surface-muted">@student.StudentCode</div>
+                                </div>
+                                @if (selectedId == student.Id)
+                                {
+                                    <span class="material-symbols-outlined text-[18px] text-primary">check_circle</span>
+                                }
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="space-y-6 @(isStudent ? string.Empty : "xl:col-span-2")">
+            @if (selectedStudent is null)
+            {
+                <div class="card p-6">
+                    <partial name="Partials/_EmptyState" model="@(new EmptyStateModel { Icon = "how_to_reg", Title = isStudent ? "No student record linked" : "Select a student to begin", Message = isStudent ? "Your account is not linked to a student profile. Contact the registrar for assistance." : "Choose a student from the directory to review their enrolled courses and assign new sections.", ActionText = isStudent ? null : "Open Student Directory", ActionUrl = isStudent ? null : "Index", ActionController = "Student" })" />
+                </div>
+            }
+            else
+            {
+                @if (isStudent)
+                {
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                        <div class="kpi-card">
+                            <span class="text-label-md font-semibold uppercase tracking-wide text-light-on-surface-muted dark:text-dark-on-surface-muted">Registered Courses</span>
+                            <div class="mt-3 font-headline text-headline-xl font-bold text-primary tabular-nums">@Model.Count</div>
+                            <div class="mt-1 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Active registrations</div>
+                        </div>
+                        <div class="kpi-card">
+                            <span class="text-label-md font-semibold uppercase tracking-wide text-light-on-surface-muted dark:text-dark-on-surface-muted">Credits Enrolled</span>
+                            <div class="mt-3 font-headline text-headline-xl font-bold text-light-on-surface tabular-nums dark:text-dark-on-surface">@enrolledCredits</div>
+                            <div class="mt-1 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">This academic term</div>
+                        </div>
+                        <div class="kpi-card">
+                            <span class="text-label-md font-semibold uppercase tracking-wide text-light-on-surface-muted dark:text-dark-on-surface-muted">Credits Earned</span>
+                            <div class="mt-3 font-headline text-headline-xl font-bold text-success tabular-nums">@earnedCredits</div>
+                            <div class="mt-1 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Passed courses</div>
+                        </div>
+                    </div>
+                }
+
+                <div class="card p-5">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <span class="avatar avatar-initials h-12 w-12 text-base">@UiFormat.Initials(selectedStudent.FullName)</span>
+                            <div>
+                                <div class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">@selectedStudent.FullName</div>
+                                <div class="font-mono text-body-sm text-primary">@selectedStudent.StudentCode</div>
+                                <div class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@selectedStudent.Program &bull; Cohort @selectedStudent.EnrollmentYear</div>
+                            </div>
+                            <partial name="Partials/_StatusBadge" model="UiFormat.StudentStatusBadge(selectedStudent.Status)" />
+                        </div>
+                        <a asp-controller="Student" asp-action="Details" asp-route-id="@selectedStudent.Id" class="btn btn-secondary">Open Profile</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Registered Courses</h3>
+                        <span class="badge badge-info">@Model.Count registrations</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="table-lumina">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Credits</th>
+                                    <th>Enrolled On</th>
+                                    <th>Grade</th>
+                                    <th class="text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Count == 0)
+                                {
+                                    <tr><td colspan="5" class="text-center text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">No courses registered yet. Pick a section from the catalog below.</td></tr>
+                                }
+                                else
+                                {
+                                    @foreach (var item in Model)
+                                    {
+                                        var credits = courses.FirstOrDefault(c => c.Id == item.CourseId)?.Credits ?? 0;
+                                        <tr>
+                                            <td>
+                                                <div class="font-semibold text-primary">@item.CourseCode</div>
+                                                <div class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@item.CourseName</div>
+                                            </td>
+                                            <td class="tabular-nums">@credits</td>
+                                            <td class="text-light-on-surface dark:text-dark-on-surface">@UiFormat.FormatDate(item.EnrolledAt)</td>
+                                            <td><partial name="Partials/_StatusBadge" model="@(new BadgeModel { Text = UiFormat.FormatGrade(item.Grade), Tone = UiFormat.GradeTone(item.Grade) })" /></td>
+                                            <td class="text-right">
+                                                <form asp-action="Unenroll" method="post" class="inline" data-confirm="Remove this course registration?">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="studentId" value="@selectedStudent.Id" />
+                                                    <input type="hidden" name="courseId" value="@item.CourseId" />
+                                                    <input type="hidden" name="search" value="@search" />
+                                                    <button type="submit" class="text-label-md font-semibold text-error hover:underline">Drop</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Available Sections</h3>
+                            <p class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Sections with open seats this term.</p>
+                        </div>
+                        <span class="badge badge-success">@availableCourses.Count available</span>
+                    </div>
+                    <div class="card-body">
+                        @if (availableCourses.Count == 0)
+                        {
+                            <partial name="Partials/_EmptyState" model="@(new EmptyStateModel { Icon = "task_alt", Title = "You are enrolled in every open section", Message = "There are no additional courses available for registration right now." })" />
+                        }
+                        else
+                        {
+                            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                                @foreach (var course in availableCourses)
+                                {
+                                    var seats = Math.Max(0, course.Capacity - course.EnrolledCount);
+                                    var percent = course.Capacity <= 0 ? 0 : Math.Min(100, (int)Math.Round(course.EnrolledCount / (double)course.Capacity * 100));
+                                    <article class="flex flex-col justify-between rounded-xl border border-light-border bg-light-surface-subtle p-5 dark:border-dark-border dark:bg-dark-surface-subtle">
+                                        <div>
+                                            <div class="flex items-start justify-between gap-2">
+                                                <span class="rounded bg-primary-container px-2.5 py-0.5 text-label-sm font-bold text-primary">@course.CourseCode &bull; @course.Credits Credits</span>
+                                                <partial name="Partials/_StatusBadge" model="UiFormat.CourseStatusBadge(course.EnrolledCount, course.Capacity)" />
+                                            </div>
+                                            <h4 class="mt-2 font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">@course.Name</h4>
+                                            <p class="mt-1 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@(string.IsNullOrWhiteSpace(course.LecturerName) ? "Unassigned instructor" : course.LecturerName)</p>
+                                            <div class="mt-3">
+                                                <div class="mb-1 flex justify-between text-body-sm">
+                                                    <span class="text-light-on-surface-muted dark:text-dark-on-surface-muted">@seats seats remaining</span>
+                                                    <span class="font-bold text-primary tabular-nums">@course.EnrolledCount / @course.Capacity</span>
+                                                </div>
+                                                <div class="stat-bar"><div class="progress-fill" style="width: @(percent)%"></div></div>
+                                            </div>
+                                        </div>
+                                        <form asp-action="Enroll" method="post" class="mt-4 border-t border-light-border pt-3 dark:border-dark-border">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="studentId" value="@selectedStudent.Id" />
+                                            <input type="hidden" name="courseId" value="@course.Id" />
+                                            <input type="hidden" name="search" value="@search" />
+                                            <button type="submit" class="btn btn-primary w-full">
+                                                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                                                <span>Enroll in Course</span>
+                                            </button>
+                                        </form>
+                                    </article>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

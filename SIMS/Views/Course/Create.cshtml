@@ -1,0 +1,73 @@
+@model CourseCreateRequest
+@{
+    ViewData["Title"] = "Create Course";
+    ViewData["Breadcrumb"] = "New Course";
+    ViewData["ActiveNav"] = "course";
+    var teachers = ViewData["Teachers"] as IReadOnlyList<TeacherListItem> ?? Array.Empty<TeacherListItem>();
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="page-title">Create Course Offering</h2>
+            <p class="page-subtitle">Register a new catalog offering, assign an instructor and allocate seat capacity.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span>Back to Catalog</span>
+        </a>
+    </div>
+
+    <form asp-action="Create" method="post" class="card p-6">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="mb-4 rounded-lg bg-error-container px-4 py-3 text-body-sm font-semibold text-error empty:hidden"></div>
+
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+            <div>
+                <label asp-for="CourseCode" class="label">Course Code <span class="text-error">*</span></label>
+                <input asp-for="CourseCode" class="input font-bold uppercase" placeholder="CS-302" />
+                <span class="mt-1 block text-xs text-light-on-surface-muted dark:text-dark-on-surface-muted">Department code + level, e.g. CS-302.</span>
+                <span asp-validation-for="CourseCode" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div class="md:col-span-2">
+                <label asp-for="Name" class="label">Course Title <span class="text-error">*</span></label>
+                <input asp-for="Name" class="input" placeholder="Advanced Database Architecture" />
+                <span asp-validation-for="Name" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div class="md:col-span-3">
+                <label asp-for="Description" class="label">Course Catalog Description <span class="text-error">*</span></label>
+                <textarea asp-for="Description" rows="3" class="textarea" placeholder="Summary of topics, learning outcomes and prerequisites."></textarea>
+                <span asp-validation-for="Description" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div>
+                <label asp-for="Credits" class="label">Academic Credits <span class="text-error">*</span></label>
+                <input asp-for="Credits" type="number" min="1" max="12" class="input" />
+                <span asp-validation-for="Credits" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div>
+                <label asp-for="Capacity" class="label">Maximum Seat Capacity <span class="text-error">*</span></label>
+                <input asp-for="Capacity" type="number" min="1" max="1000" class="input" />
+                <span asp-validation-for="Capacity" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div>
+                <label asp-for="LecturerId" class="label">Assigned Instructor</label>
+                <select asp-for="LecturerId" class="select">
+                    <option value="">Unassigned</option>
+                    @foreach (var teacher in teachers)
+                    {
+                        <option value="@teacher.Id">@teacher.FullName (@teacher.Department)</option>
+                    }
+                </select>
+                <span asp-validation-for="LecturerId" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3 border-t border-light-border pt-5 dark:border-dark-border">
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                <span class="material-symbols-outlined text-[18px]">save</span>
+                <span>Save Course</span>
+            </button>
+        </div>
+    </form>
+</div>

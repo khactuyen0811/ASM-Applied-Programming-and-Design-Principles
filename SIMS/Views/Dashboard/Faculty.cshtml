@@ -1,0 +1,153 @@
+@model FacultyDashboardStats?
+@{
+    ViewData["Title"] = "Faculty Dashboard";
+    ViewData["Breadcrumb"] = "Faculty Workspace";
+    ViewData["ActiveNav"] = "dashboard";
+}
+
+@if (Model is null)
+{
+    <div class="space-y-6">
+        <div>
+            <h2 class="page-title">Faculty Dashboard</h2>
+            <p class="page-subtitle">Your teaching portfolio and student activity will appear here.</p>
+        </div>
+        <div class="card p-6">
+            <partial name="Partials/_EmptyState" model="@(new EmptyStateModel { Icon = "school", Title = "No faculty profile linked", Message = "Your lecturer account is not linked to a teaching record yet. Contact the registrar to complete the setup.", ActionText = "Course Catalog", ActionUrl = "Index", ActionController = "Course" })" />
+        </div>
+    </div>
+}
+else
+{
+    <div class="space-y-6">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="page-title">Welcome back, @Model.TeacherName</h2>
+                <p class="page-subtitle">@Model.Department &bull; Faculty teaching overview for the current term.</p>
+            </div>
+            <div class="flex gap-2">
+                <a asp-controller="Course" asp-action="Index" class="btn btn-secondary">
+                    <span class="material-symbols-outlined text-[18px]">menu_book</span>
+                    <span>My Courses</span>
+                </a>
+                <a asp-controller="Enrollment" asp-action="Index" class="btn btn-primary">
+                    <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+                    <span>Enrollments</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+            <div class="kpi-card">
+                <div class="flex items-center justify-between">
+                    <span class="text-label-md font-semibold uppercase tracking-wide text-light-on-surface-muted dark:text-dark-on-surface-muted">Assigned Courses</span>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-container text-primary"><span class="material-symbols-outlined text-[20px]">menu_book</span></span>
+                </div>
+                <div class="mt-3 font-headline text-headline-xl font-bold text-light-on-surface tabular-nums dark:text-dark-on-surface">@Model.Courses.Count</div>
+                <div class="mt-1 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Sections under your lead</div>
+            </div>
+            <div class="kpi-card">
+                <div class="flex items-center justify-between">
+                    <span class="text-label-md font-semibold uppercase tracking-wide text-light-on-surface-muted dark:text-dark-on-surface-muted">Total Students</span>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-container text-accent"><span class="material-symbols-outlined text-[20px]">groups</span></span>
+                </div>
+                <div class="mt-3 font-headline text-headline-xl font-bold text-light-on-surface tabular-nums dark:text-dark-on-surface">@Model.TotalStudents</div>
+                <div class="mt-1 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Across all your sections</div>
+            </div>
+            <div class="kpi-card">
+                <div class="flex items-center justify-between">
+                    <span class="text-label-md font-semibold uppercase tracking-wide text-light-on-surface-muted dark:text-dark-on-surface-muted">Pending Grades</span>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-warning-container text-warning"><span class="material-symbols-outlined text-[20px]">grading</span></span>
+                </div>
+                <div class="mt-3 font-headline text-headline-xl font-bold text-light-on-surface tabular-nums dark:text-dark-on-surface">@Model.PendingGrades</div>
+                <div class="mt-1 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Records awaiting grading</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">My Courses</h3>
+                <span class="badge badge-neutral">@Model.Courses.Count sections</span>
+            </div>
+            <div class="card-body">
+                @if (Model.Courses.Count == 0)
+                {
+                    <partial name="Partials/_EmptyState" model="@(new EmptyStateModel { Icon = "menu_book", Title = "No courses assigned", Message = "You are not currently assigned to any course section. The registrar can allocate sections to your profile.", ActionText = "Browse Catalog", ActionUrl = "Index", ActionController = "Course" })" />
+                }
+                else
+                {
+                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        @foreach (var course in Model.Courses)
+                        {
+                            var percent = course.Capacity <= 0 ? 0 : (int)Math.Round(course.EnrolledCount / (double)course.Capacity * 100);
+                            <article class="flex flex-col justify-between rounded-xl border border-light-border bg-light-surface-subtle p-5 dark:border-dark-border dark:bg-dark-surface-subtle">
+                                <div>
+                                    <div class="flex items-start justify-between gap-3">
+                                        <span class="rounded bg-primary-container px-2.5 py-0.5 text-label-sm font-bold text-primary">@course.CourseCode &bull; @course.Credits Credits</span>
+                                        <span class="text-label-sm font-semibold text-light-on-surface-muted dark:text-dark-on-surface-muted">@course.EnrolledCount / @course.Capacity</span>
+                                    </div>
+                                    <h4 class="mt-2 font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">@course.Name</h4>
+                                    <div class="mt-3">
+                                        <div class="stat-bar"><div class="progress-fill" style="width: @(percent)%"></div></div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex items-center justify-between border-t border-light-border pt-3 dark:border-dark-border">
+                                    <span class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@percent% capacity filled</span>
+                                    <a asp-controller="Course" asp-action="Details" asp-route-id="@course.CourseId" class="text-label-md font-semibold text-primary hover:underline">Open section</a>
+                                </div>
+                            </article>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Recent Enrollment Activity</h3>
+                <a asp-controller="Enrollment" asp-action="Index" class="text-label-md font-semibold text-accent hover:underline">View all</a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table-lumina">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Enrolled On</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.RecentEnrollments.Count == 0)
+                        {
+                            <tr><td colspan="4" class="text-center text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">No recent enrollment activity.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.RecentEnrollments)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="flex items-center gap-3">
+                                            <span class="avatar avatar-initials h-8 w-8 text-[11px]">@UiFormat.Initials(item.StudentName)</span>
+                                            <div class="min-w-0">
+                                                <div class="truncate font-semibold text-light-on-surface dark:text-dark-on-surface">@item.StudentName</div>
+                                                <div class="truncate text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@item.StudentCode</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="font-semibold text-primary">@item.CourseCode</div>
+                                        <div class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@item.CourseName</div>
+                                    </td>
+                                    <td class="text-light-on-surface dark:text-dark-on-surface">@UiFormat.FormatDate(item.EnrolledAt)</td>
+                                    <td><partial name="Partials/_StatusBadge" model="@(new BadgeModel { Text = UiFormat.FormatGrade(item.Grade), Tone = UiFormat.GradeTone(item.Grade) })" /></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

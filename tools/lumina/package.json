@@ -1,0 +1,13 @@
+{
+  "name": "sims-lumina-ui",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lumina design system build pipeline for SIMS",
+  "scripts": {
+    "build:css": "tailwindcss -c tailwind.config.js -i input.css -o ../../SIMS/wwwroot/lumina/css/lumina.css --minify",
+    "watch:css": "tailwindcss -c tailwind.config.js -i input.css -o ../../SIMS/wwwroot/lumina/css/lumina.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.17"
+  }
+}

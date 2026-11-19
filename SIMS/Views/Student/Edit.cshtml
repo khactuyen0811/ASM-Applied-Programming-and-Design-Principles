@@ -1,0 +1,92 @@
+@model StudentUpdateRequest
+@{
+    ViewData["Title"] = "Edit Student";
+    ViewData["Breadcrumb"] = "Edit Student";
+    ViewData["ActiveNav"] = "student";
+    var id = ViewContext.RouteData.Values["id"];
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="page-title">Edit Student Record</h2>
+            <p class="page-subtitle">Update personal details, academic program and enrollment status.</p>
+        </div>
+        <div class="flex gap-2">
+            <a asp-action="Details" asp-route-id="@id" class="btn btn-secondary">
+                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                <span>View Profile</span>
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                <span>Back</span>
+            </a>
+        </div>
+    </div>
+
+    <form asp-action="Edit" asp-route-id="@id" method="post" class="card p-6">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="mb-4 rounded-lg bg-error-container px-4 py-3 text-body-sm font-semibold text-error empty:hidden"></div>
+
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div>
+                <label asp-for="FullName" class="label">Full Name <span class="text-error">*</span></label>
+                <input asp-for="FullName" class="input" />
+                <span asp-validation-for="FullName" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div>
+                <label asp-for="Email" class="label">Institutional Email <span class="text-error">*</span></label>
+                <input asp-for="Email" type="email" class="input" />
+                <span asp-validation-for="Email" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div>
+                <label asp-for="DateOfBirth" class="label">Date of Birth <span class="text-error">*</span></label>
+                <input asp-for="DateOfBirth" type="date" class="input" />
+                <span asp-validation-for="DateOfBirth" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div>
+                <label asp-for="Gender" class="label">Gender</label>
+                <select asp-for="Gender" class="select">
+                    <option value="">Select gender</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Other">Other</option>
+                </select>
+                <span asp-validation-for="Gender" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div>
+                <label asp-for="Phone" class="label">Phone</label>
+                <input asp-for="Phone" class="input" />
+                <span asp-validation-for="Phone" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div>
+                <label asp-for="Program" class="label">Degree Program <span class="text-error">*</span></label>
+                <input asp-for="Program" class="input" />
+                <span asp-validation-for="Program" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div>
+                <label asp-for="EnrollmentYear" class="label">Enrollment Year <span class="text-error">*</span></label>
+                <input asp-for="EnrollmentYear" type="number" min="1990" max="2100" class="input" />
+                <span asp-validation-for="EnrollmentYear" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div>
+                <label asp-for="Status" class="label">Enrollment Status <span class="text-error">*</span></label>
+                <select asp-for="Status" asp-items="Html.GetEnumSelectList<StudentStatus>()" class="select"></select>
+                <span asp-validation-for="Status" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div class="md:col-span-2">
+                <label asp-for="Address" class="label">Address</label>
+                <textarea asp-for="Address" rows="3" class="textarea"></textarea>
+                <span asp-validation-for="Address" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3 border-t border-light-border pt-5 dark:border-dark-border">
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                <span class="material-symbols-outlined text-[18px]">save</span>
+                <span>Save Changes</span>
+            </button>
+        </div>
+    </form>
+</div>

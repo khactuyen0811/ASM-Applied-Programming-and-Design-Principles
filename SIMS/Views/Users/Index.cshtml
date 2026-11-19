@@ -1,0 +1,174 @@
+@model PagedResult<UserListItem>
+@{
+    ViewData["Title"] = "Users & Roles";
+    ViewData["Breadcrumb"] = "Access Control";
+    ViewData["ActiveNav"] = "users";
+
+    var search = ViewData["Search"] as string;
+    var selectedRole = ViewData["Role"] as UserRole?;
+    var summary = ViewData["Summary"] as UserSummary ?? new UserSummary();
+
+    var routeValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    if (!string.IsNullOrWhiteSpace(search)) { routeValues["search"] = search!; }
+    if (selectedRole.HasValue) { routeValues["role"] = ((int)selectedRole.Value).ToString(CultureInfo.InvariantCulture); }
+
+    var pagination = new PaginationModel
+    {
+        Page = Model.Page,
+        PageSize = Model.PageSize,
+        TotalCount = Model.TotalCount,
+        Action = "Index",
+        Controller = "Users",
+        RouteValues = routeValues
+    };
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="page-title">Users &amp; Role Management</h2>
+            <p class="page-subtitle">Control system access, assign roles and manage account security.</p>
+        </div>
+        <span class="badge badge-primary">Administrator tool</span>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div class="kpi-card">
+            <span class="text-label-md font-semibold uppercase tracking-wide text-light-on-surface-muted dark:text-dark-on-surface-muted">Total Accounts</span>
+            <div class="mt-2 font-headline text-headline-lg font-bold text-light-on-surface tabular-nums dark:text-dark-on-surface">@summary.Total</div>
+        </div>
+        <div class="kpi-card">
+            <span class="text-label-md font-semibold uppercase tracking-wide text-light-on-surface-muted dark:text-dark-on-surface-muted">Administrators</span>
+            <div class="mt-2 font-headline text-headline-lg font-bold text-primary tabular-nums">@summary.Admins</div>
+        </div>
+        <div class="kpi-card">
+            <span class="text-label-md font-semibold uppercase tracking-wide text-light-on-surface-muted dark:text-dark-on-surface-muted">Lecturers</span>
+            <div class="mt-2 font-headline text-headline-lg font-bold text-accent tabular-nums">@summary.Lecturers</div>
+        </div>
+        <div class="kpi-card">
+            <span class="text-label-md font-semibold uppercase tracking-wide text-light-on-surface-muted dark:text-dark-on-surface-muted">Students</span>
+            <div class="mt-2 font-headline text-headline-lg font-bold text-success tabular-nums">@summary.Students</div>
+        </div>
+    </div>
+
+    <form asp-action="Index" method="get" class="card flex flex-col gap-3 p-4 lg:flex-row lg:items-end">
+        <div class="flex-1">
+            <label for="userSearch" class="label">Search</label>
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-light-on-surface-muted dark:text-dark-on-surface-muted">search</span>
+                <input id="userSearch" type="search" name="search" value="@search" placeholder="Username, display name or email..." class="input pl-10" />
+            </div>
+        </div>
+        <div class="lg:w-52">
+            <label for="userRole" class="label">Role</label>
+            <select id="userRole" name="role" class="select">
+                <option value="">All Roles</option>
+                <option value="1" selected="@(selectedRole == UserRole.Admin)">Admin</option>
+                <option value="2" selected="@(selectedRole == UserRole.Lecturer)">Lecturer</option>
+                <option value="3" selected="@(selectedRole == UserRole.Student)">Student</option>
+            </select>
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" class="btn btn-primary">Apply</button>
+            <a asp-action="Index" class="btn btn-secondary">Reset</a>
+        </div>
+        <span class="badge badge-neutral self-center">@summary.Active active &bull; @summary.Inactive suspended</span>
+    </form>
+
+    <div class="overflow-hidden rounded-xl border border-light-border bg-light-surface shadow-sm dark:border-dark-border dark:bg-dark-surface">
+        <div class="overflow-x-auto">
+            <table class="table-lumina">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Linked Record</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th class="text-right">Security</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items.Count == 0)
+                    {
+                        <tr><td colspan="6" class="text-center text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">No user accounts match the current filters.</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var user in Model.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <span class="avatar avatar-initials h-9 w-9 text-[12px]">@UiFormat.Initials(user.DisplayName)</span>
+                                        <div class="min-w-0">
+                                            <a asp-action="Details" asp-route-id="@user.Id" class="block truncate font-semibold text-light-on-surface hover:text-accent dark:text-dark-on-surface dark:hover:text-accent">@user.DisplayName</a>
+                                            <div class="truncate font-mono text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@user.Username</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="flex flex-col gap-2">
+                                        <partial name="Partials/_StatusBadge" model="UiFormat.RoleBadge(user.Role)" />
+                                        <form asp-action="UpdateRole" method="post" class="flex items-center gap-1">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <select name="role" class="select px-2 py-1 text-body-sm">
+                                                <option value="1" selected="@(user.Role == UserRole.Admin)">Admin</option>
+                                                <option value="2" selected="@(user.Role == UserRole.Lecturer)">Lecturer</option>
+                                                <option value="3" selected="@(user.Role == UserRole.Student)">Student</option>
+                                            </select>
+                                            <button type="submit" class="text-label-sm font-semibold text-accent hover:underline">Save</button>
+                                        </form>
+                                    </div>
+                                </td>
+                                <td class="text-light-on-surface dark:text-dark-on-surface">
+                                    @if (string.IsNullOrWhiteSpace(user.LinkedEmail))
+                                    {
+                                        <span class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Not linked</span>
+                                    }
+                                    else
+                                    {
+                                        <div>@user.LinkedEmail</div>
+                                        <div class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">
+                                            @(user.StudentId.HasValue ? $"Student #{user.StudentId}" : user.TeacherId.HasValue ? $"Teacher #{user.TeacherId}" : string.Empty)
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    @if (user.IsActive)
+                                    {
+                                        <span class="badge badge-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-error">Suspended</span>
+                                    }
+                                </td>
+                                <td class="text-light-on-surface dark:text-dark-on-surface">@UiFormat.FormatDate(user.CreatedAt)</td>
+                                <td class="text-right">
+                                    <div class="inline-flex flex-col items-end gap-1">
+                                        <form asp-action="SetActive" method="post" data-confirm="@(user.IsActive ? "Suspend this account?" : "Activate this account?")">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <input type="hidden" name="active" value="@(user.IsActive ? "false" : "true")" />
+                                            <button type="submit" class="text-label-md font-semibold @(user.IsActive ? "text-error" : "text-success") hover:underline">
+                                                @(user.IsActive ? "Suspend" : "Activate")
+                                            </button>
+                                        </form>
+                                        <form asp-action="ResetPassword" method="post" data-confirm="Generate a new temporary password for this user?">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="text-label-md font-semibold text-accent hover:underline">Reset password</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <partial name="Partials/_Pagination" model="pagination" />
+    </div>
+</div>

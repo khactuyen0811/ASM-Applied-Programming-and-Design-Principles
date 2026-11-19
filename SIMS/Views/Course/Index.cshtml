@@ -1,0 +1,169 @@
+@model PagedResult<CourseListItem>
+@{
+    ViewData["Title"] = "Courses";
+    ViewData["Breadcrumb"] = "Course Catalog";
+    ViewData["ActiveNav"] = "course";
+
+    var search = ViewData["Search"] as string;
+    var isAdmin = User.IsInRole("Admin");
+
+    var routeValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    if (!string.IsNullOrWhiteSpace(search)) { routeValues["search"] = search!; }
+
+    var pagination = new PaginationModel
+    {
+        Page = Model.Page,
+        PageSize = Model.PageSize,
+        TotalCount = Model.TotalCount,
+        Action = "Index",
+        Controller = "Course",
+        RouteValues = routeValues
+    };
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="page-title">Departmental Course Catalog</h2>
+            <p class="page-subtitle">Explore syllabus standards, faculty assignments and classroom capacity limits.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="flex items-center rounded-lg border border-light-border bg-light-surface p-1 shadow-sm dark:border-dark-border dark:bg-dark-surface">
+                <button type="button" data-view-toggle="grid" class="tab tab-active" title="Grid view" aria-label="Grid view">
+                    <span class="material-symbols-outlined text-[20px]">grid_view</span>
+                </button>
+                <button type="button" data-view-toggle="table" class="tab" title="Table view" aria-label="Table view">
+                    <span class="material-symbols-outlined text-[20px]">table_rows</span>
+                </button>
+            </div>
+            @if (isAdmin)
+            {
+                <a asp-action="Create" class="btn btn-primary">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    <span>Create Course</span>
+                </a>
+            }
+        </div>
+    </div>
+
+    <form asp-action="Index" method="get" class="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="relative w-full sm:w-96">
+            <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-[18px] text-light-on-surface-muted dark:text-dark-on-surface-muted">search</span>
+            <input type="search" name="search" value="@search" placeholder="Search by code (e.g. CS-302) or title..." class="input pl-10" />
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="submit" class="btn btn-primary">Search</button>
+            <a asp-action="Index" class="btn btn-secondary">Reset</a>
+            <span class="badge badge-neutral">@Model.TotalCount courses</span>
+        </div>
+    </form>
+
+    <div data-view-panel="grid" class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        @if (Model.Items.Count == 0)
+        {
+            <div class="md:col-span-2 lg:col-span-3">
+                @await Html.PartialAsync("Partials/_EmptyState", new EmptyStateModel
+                {
+                    Icon = "menu_book",
+                    Title = "No courses found",
+                    Message = "No catalog entries match your search. Adjust the query or create a new course offering.",
+                    ActionText = isAdmin ? "Create Course" : null,
+                    ActionUrl = isAdmin ? "Create" : null,
+                    ActionController = "Course"
+                })
+            </div>
+        }
+        else
+        {
+            @foreach (var course in Model.Items)
+            {
+                var percent = course.Capacity <= 0 ? 0 : Math.Min(100, (int)Math.Round(course.EnrolledCount / (double)course.Capacity * 100));
+                <article class="flex flex-col justify-between rounded-xl border border-light-border bg-light-surface p-5 shadow-sm transition-colors hover:border-accent/40 dark:border-dark-border dark:bg-dark-surface">
+                    <div>
+                        <div class="mb-3 flex items-start justify-between gap-2">
+                            <span class="rounded bg-primary-container px-2.5 py-0.5 text-label-sm font-bold text-primary">@course.CourseCode &bull; @course.Credits Credits</span>
+                            <partial name="Partials/_StatusBadge" model="UiFormat.CourseStatusBadge(course.EnrolledCount, course.Capacity)" />
+                        </div>
+                        <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">@course.Name</h3>
+                        <p class="mt-1 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Instructor: @(string.IsNullOrWhiteSpace(course.LecturerName) ? "Unassigned" : course.LecturerName)</p>
+
+                        <div class="mt-4">
+                            <div class="mb-1 flex justify-between text-body-sm">
+                                <span class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Capacity (@percent% filled)</span>
+                                <span class="font-bold text-primary tabular-nums">@course.EnrolledCount / @course.Capacity</span>
+                            </div>
+                            <div class="stat-bar"><div class="progress-fill" style="width: @(percent)%"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 flex items-center justify-between border-t border-light-border pt-4 dark:border-dark-border">
+                        <span class="text-xs text-light-on-surface-muted dark:text-dark-on-surface-muted">@(course.Capacity - course.EnrolledCount) seats remaining</span>
+                        <div class="flex gap-1">
+                            <a asp-action="Details" asp-route-id="@course.Id" class="rounded px-2.5 py-1 text-label-sm font-semibold text-primary hover:bg-primary-container/40">View Detail</a>
+                            @if (isAdmin)
+                            {
+                                <a asp-action="Edit" asp-route-id="@course.Id" class="rounded p-1 text-light-on-surface-muted hover:text-accent dark:text-dark-on-surface-muted" aria-label="Edit course">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </article>
+            }
+        }
+    </div>
+
+    <div data-view-panel="table" class="hidden overflow-hidden rounded-xl border border-light-border bg-light-surface shadow-sm dark:border-dark-border dark:bg-dark-surface">
+        <div class="overflow-x-auto">
+            <table class="table-lumina">
+                <thead>
+                    <tr>
+                        <th>Course Code</th>
+                        <th>Course Title</th>
+                        <th>Credits</th>
+                        <th>Primary Instructor</th>
+                        <th>Enrolled / Cap</th>
+                        <th>Status</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items.Count == 0)
+                    {
+                        <tr><td colspan="7" class="text-center text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">No courses found.</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var course in Model.Items)
+                        {
+                            <tr>
+                                <td class="font-bold text-primary">@course.CourseCode</td>
+                                <td class="font-medium text-light-on-surface dark:text-dark-on-surface">@course.Name</td>
+                                <td class="tabular-nums">@course.Credits</td>
+                                <td class="text-light-on-surface dark:text-dark-on-surface">@(string.IsNullOrWhiteSpace(course.LecturerName) ? "Unassigned" : course.LecturerName)</td>
+                                <td class="font-bold tabular-nums">@course.EnrolledCount / @course.Capacity</td>
+                                <td><partial name="Partials/_StatusBadge" model="UiFormat.CourseStatusBadge(course.EnrolledCount, course.Capacity)" /></td>
+                                <td class="text-right">
+                                    <div class="inline-flex items-center gap-2">
+                                        <a asp-action="Details" asp-route-id="@course.Id" class="text-label-md font-semibold text-primary hover:underline">Details</a>
+                                        @if (isAdmin)
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@course.Id" class="text-label-md font-semibold text-accent hover:underline">Edit</a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <partial name="Partials/_Pagination" model="pagination" />
+    </div>
+
+    <div data-view-panel="grid">
+        <div class="overflow-hidden rounded-xl border border-light-border bg-light-surface shadow-sm dark:border-dark-border dark:bg-dark-surface">
+            <partial name="Partials/_Pagination" model="pagination" />
+        </div>
+    </div>
+</div>

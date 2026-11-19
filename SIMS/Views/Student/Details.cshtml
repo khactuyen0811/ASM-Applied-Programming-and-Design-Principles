@@ -1,0 +1,179 @@
+@model StudentDetails
+@{
+    ViewData["Title"] = "Student Profile";
+    ViewData["Breadcrumb"] = Model.FullName;
+    ViewData["ActiveNav"] = "student";
+
+    var courses = ViewData["AvailableCourses"] as IReadOnlyList<CourseListItem> ?? Array.Empty<CourseListItem>();
+    var isStaff = User.IsInRole("Admin") || User.IsInRole("Lecturer");
+    var isAdmin = User.IsInRole("Admin");
+    var message = TempData["StudentMessage"] as string;
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <a asp-action="Index" class="btn btn-secondary w-fit">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span>Back to Directory</span>
+        </a>
+        @if (isStaff)
+        {
+            <div class="flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                    <span>Edit Profile</span>
+                </a>
+            </div>
+        }
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <div class="rounded-xl border border-accent/30 bg-accent-container px-4 py-3 text-body-sm font-semibold text-accent">@message</div>
+    }
+
+    <div class="card p-6">
+        <div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div class="flex items-center gap-4">
+                <span class="avatar avatar-initials h-16 w-16 text-xl">@UiFormat.Initials(Model.FullName)</span>
+                <div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <h2 class="font-headline text-headline-lg font-bold text-light-on-surface dark:text-dark-on-surface">@Model.FullName</h2>
+                        <partial name="Partials/_StatusBadge" model="UiFormat.StudentStatusBadge(Model.Status)" />
+                    </div>
+                    <p class="mt-1 font-mono text-body-md text-primary">@Model.StudentCode</p>
+                    <p class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@Model.Program &bull; Cohort @Model.EnrollmentYear &bull; Registered @UiFormat.FormatDate(Model.CreatedAt)</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 text-body-sm">
+                <div>
+                    <div class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Email</div>
+                    <div class="font-semibold text-light-on-surface dark:text-dark-on-surface">@Model.Email</div>
+                </div>
+                <div>
+                    <div class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Phone</div>
+                    <div class="font-semibold text-light-on-surface dark:text-dark-on-surface">@(string.IsNullOrWhiteSpace(Model.Phone) ? "--" : Model.Phone)</div>
+                </div>
+                <div>
+                    <div class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Date of Birth</div>
+                    <div class="font-semibold text-light-on-surface dark:text-dark-on-surface">@UiFormat.FormatDate(Model.DateOfBirth)</div>
+                </div>
+                <div>
+                    <div class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Gender</div>
+                    <div class="font-semibold text-light-on-surface dark:text-dark-on-surface">@(string.IsNullOrWhiteSpace(Model.Gender) ? "--" : Model.Gender)</div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-5 border-t border-light-border pt-4 dark:border-dark-border">
+            <div class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Address</div>
+            <div class="text-body-md text-light-on-surface dark:text-dark-on-surface">@(string.IsNullOrWhiteSpace(Model.Address) ? "--" : Model.Address)</div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="card lg:col-span-2">
+            <div class="card-header">
+                <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Enrolled Courses</h3>
+                <span class="badge badge-info">@Model.Enrollments.Count registrations</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table-lumina">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Enrolled On</th>
+                            <th>Grade</th>
+                            @if (isStaff)
+                            {
+                                <th class="text-right">Action</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Enrollments.Count == 0)
+                        {
+                            <tr><td colspan="@(isStaff ? 4 : 3)" class="text-center text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">No course enrollments yet.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var enrollment in Model.Enrollments)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="font-semibold text-primary">@enrollment.CourseCode</div>
+                                        <div class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@enrollment.CourseName</div>
+                                    </td>
+                                    <td class="text-light-on-surface dark:text-dark-on-surface">@UiFormat.FormatDate(enrollment.EnrolledAt)</td>
+                                    <td><partial name="Partials/_StatusBadge" model="@(new BadgeModel { Text = UiFormat.FormatGrade(enrollment.Grade), Tone = UiFormat.GradeTone(enrollment.Grade) })" /></td>
+                                    @if (isStaff)
+                                    {
+                                        <td class="text-right">
+                                            <form asp-action="Unenroll" asp-route-id="@Model.Id" method="post" class="inline" data-confirm="Remove this course enrollment?">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="courseId" value="@enrollment.CourseId" />
+                                                <button type="submit" class="text-label-md font-semibold text-error hover:underline">Remove</button>
+                                            </form>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @if (isStaff)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Enroll in Course</h3>
+                </div>
+                <div class="card-body space-y-4">
+                    @if (courses.Count == 0)
+                    {
+                        <p class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">No courses are available for enrollment.</p>
+                    }
+                    else
+                    {
+                        <form asp-action="Enroll" asp-route-id="@Model.Id" method="post" class="space-y-4">
+                            @Html.AntiForgeryToken()
+                            <div>
+                                <label for="courseId" class="label">Course</label>
+                                <select id="courseId" name="courseId" class="select">
+                                    @foreach (var course in courses)
+                                    {
+                                        <option value="@course.Id">@course.CourseCode - @course.Name (@course.EnrolledCount/@course.Capacity)</option>
+                                    }
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-full">
+                                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                                <span>Enroll Student</span>
+                            </button>
+                        </form>
+                    }
+                    <div class="border-t border-light-border pt-4 dark:border-dark-border">
+                        <a asp-controller="Enrollment" asp-action="Index" asp-route-studentId="@Model.Id" class="btn btn-secondary w-full">Open enrollment desk</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (isAdmin)
+    {
+        <div class="rounded-xl border border-error/30 bg-error-container/40 p-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <div class="text-label-md font-bold uppercase tracking-wide text-error">Danger Zone</div>
+                    <p class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Permanently delete this student and their enrollment records.</p>
+                </div>
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" data-confirm="Delete this student record permanently?">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Delete Student</button>
+                </form>
+            </div>
+        </div>
+    }
+</div>

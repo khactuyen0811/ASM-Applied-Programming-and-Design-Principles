@@ -1,0 +1,112 @@
+﻿@{
+    var pageTitle = ViewData["Title"] as string ?? "Dashboard";
+    var breadcrumb = ViewData["Breadcrumb"] as string;
+    var displayName = User.FindFirst("DisplayName")?.Value;
+    if (string.IsNullOrWhiteSpace(displayName))
+    {
+        displayName = User.Identity?.Name ?? "SIMS User";
+    }
+
+    var initials = ViewData["UserInitials"] as string;
+    if (string.IsNullOrWhiteSpace(initials))
+    {
+        initials = UiFormat.Initials(displayName);
+    }
+
+    var roleLabel = User.IsInRole("Admin")
+        ? "System Administrator"
+        : User.IsInRole("Lecturer")
+            ? "Faculty Member"
+            : User.IsInRole("Student")
+                ? "Student"
+                : "Institutional User";
+
+    var dashboardAction = User.IsInRole("Student") ? "Student" : User.IsInRole("Lecturer") ? "Faculty" : "Index";
+}
+
+<header class="topbar print-hide">
+    <div class="flex min-w-0 items-center gap-3">
+        <button type="button" data-sidebar-toggle class="icon-btn lg:hidden" aria-label="Open navigation menu">
+            <span class="material-symbols-outlined text-[20px]">menu</span>
+        </button>
+        <div class="min-w-0">
+            <div class="hidden items-center gap-1.5 text-body-sm text-light-on-surface-muted sm:flex dark:text-dark-on-surface-muted">
+                <a asp-controller="Dashboard" asp-action="@dashboardAction" class="transition-colors hover:text-accent">SIMS</a>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="truncate">@(string.IsNullOrWhiteSpace(breadcrumb) ? "Lumina Workspace" : breadcrumb)</span>
+            </div>
+            <h1 class="truncate font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">@pageTitle</h1>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-2 sm:gap-3">
+        @if (!User.IsInRole("Student"))
+        {
+            <form asp-controller="Student" asp-action="Index" method="get" class="relative hidden w-64 lg:block">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-light-on-surface-muted dark:text-dark-on-surface-muted">search</span>
+                <input type="search" name="search" aria-label="Search students" placeholder="Search student records..." class="input py-2 pl-9 text-body-sm" />
+            </form>
+        }
+
+        <a asp-controller="Dashboard" asp-action="@dashboardAction" class="icon-btn hidden sm:inline-flex" title="Dashboard" aria-label="Dashboard">
+            <span class="material-symbols-outlined text-[20px]">space_dashboard</span>
+        </a>
+
+        <button type="button" data-theme-toggle class="icon-btn" aria-label="Toggle light or dark theme" title="Toggle theme">
+            <span data-theme-icon class="material-symbols-outlined text-[20px]">light_mode</span>
+        </button>
+
+        <div class="relative" data-dropdown>
+            <button type="button" data-dropdown-toggle aria-expanded="false" aria-haspopup="true" class="icon-btn relative" aria-label="Notifications">
+                <span class="material-symbols-outlined text-[20px]">notifications</span>
+                <span class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-error"></span>
+            </button>
+            <div data-dropdown-panel class="absolute right-0 z-50 mt-2 hidden w-80 overflow-hidden rounded-xl border border-light-border bg-light-surface shadow-xl dark:border-dark-border dark:bg-dark-surface">
+                <div class="flex items-center justify-between border-b border-light-border px-4 py-3 dark:border-dark-border">
+                    <span class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Notifications</span>
+                    <span class="badge badge-info">3 new</span>
+                </div>
+                <div class="divide-y divide-light-border dark:divide-dark-border">
+                    <a asp-controller="Enrollment" asp-action="Index" class="block px-4 py-3 transition-colors hover:bg-light-surface-subtle dark:hover:bg-dark-surface-subtle">
+                        <div class="text-body-sm font-semibold text-light-on-surface dark:text-dark-on-surface">Registration deadline approaching</div>
+                        <div class="mt-0.5 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Fall 2026 course registration closes Friday at 5:00 PM.</div>
+                    </a>
+                    <a asp-controller="Course" asp-action="Index" class="block px-4 py-3 transition-colors hover:bg-light-surface-subtle dark:hover:bg-dark-surface-subtle">
+                        <div class="text-body-sm font-semibold text-light-on-surface dark:text-dark-on-surface">Grade submission window open</div>
+                        <div class="mt-0.5 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Faculty can now submit mid-term grades for active sections.</div>
+                    </a>
+                    <a asp-controller="Csv" asp-action="Index" class="block px-4 py-3 transition-colors hover:bg-light-surface-subtle dark:hover:bg-dark-surface-subtle">
+                        <div class="text-body-sm font-semibold text-light-on-surface dark:text-dark-on-surface">CSV import completed</div>
+                        <div class="mt-0.5 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Transfer student batch validated with no schema errors.</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="relative" data-dropdown>
+            <button type="button" data-dropdown-toggle aria-expanded="false" aria-haspopup="true" class="flex items-center gap-2 rounded-lg border border-light-border bg-light-surface p-1.5 pr-2.5 transition-colors hover:bg-light-surface-container dark:border-dark-border dark:bg-dark-surface dark:hover:bg-dark-surface-container">
+                <span class="avatar avatar-initials h-7 w-7 text-[11px]">@initials</span>
+                <span class="hidden max-w-[140px] truncate text-label-md font-semibold text-light-on-surface sm:block dark:text-dark-on-surface">@displayName</span>
+                <span class="material-symbols-outlined text-[18px] text-light-on-surface-muted dark:text-dark-on-surface-muted">expand_more</span>
+            </button>
+            <div data-dropdown-panel class="absolute right-0 z-50 mt-2 hidden w-64 overflow-hidden rounded-xl border border-light-border bg-light-surface shadow-xl dark:border-dark-border dark:bg-dark-surface">
+                <div class="border-b border-light-border px-4 py-3 dark:border-dark-border">
+                    <div class="truncate text-label-md font-semibold text-light-on-surface dark:text-dark-on-surface">@displayName</div>
+                    <div class="truncate text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@roleLabel</div>
+                </div>
+                <a asp-controller="Profile" asp-action="Index" class="flex items-center gap-2 px-4 py-2.5 text-body-sm text-light-on-surface transition-colors hover:bg-light-surface-subtle dark:text-dark-on-surface dark:hover:bg-dark-surface-subtle">
+                    <span class="material-symbols-outlined text-[18px]">person</span>
+                    <span>View profile</span>
+                </a>
+                <form asp-controller="Login" asp-action="Logout" method="post" class="border-t border-light-border dark:border-dark-border">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="flex w-full items-center gap-2 px-4 py-2.5 text-left text-body-sm text-error transition-colors hover:bg-error-container/60">
+                        <span class="material-symbols-outlined text-[18px]">logout</span>
+                        <span>Sign out</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</header>
+

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Lumina University">
+  <defs>
+    <linearGradient id="luminaGradient" x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0284C7"/>
+      <stop offset="1" stop-color="#1E3A8A"/>
+    </linearGradient>
+  </defs>
+  <path d="M24 3 5 11v13c0 10.2 7.6 18.1 19 21 11.4-2.9 19-10.8 19-21V11L24 3Z" fill="url(#luminaGradient)"/>
+  <path d="M24 12 11 18l13 6 9.5-4.4V27h3.5V18L24 12Z" fill="#FFFFFF"/>
+  <path d="M15 22.2v5.3c0 2.9 4 5.5 9 5.5s9-2.6 9-5.5v-5.3l-9 4.2-9-4.2Z" fill="#E0F2FE"/>
+  <circle cx="35" cy="30" r="2.4" fill="#FFFFFF"/>
+</svg>

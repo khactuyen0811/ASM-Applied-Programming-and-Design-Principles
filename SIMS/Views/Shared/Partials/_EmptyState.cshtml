@@ -1,0 +1,17 @@
+@model SIMS.Models.Lumina.EmptyStateModel
+<div class="empty-state">
+    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-accent-container text-accent shadow-inner">
+        <span class="material-symbols-outlined text-[42px]">@Model.Icon</span>
+    </div>
+    <h3 class="mt-5 font-headline text-headline-md font-bold text-light-on-surface dark:text-dark-on-surface">@Model.Title</h3>
+    <p class="mx-auto mt-1.5 max-w-md text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@Model.Message</p>
+    @if (!string.IsNullOrWhiteSpace(Model.ActionText) && !string.IsNullOrWhiteSpace(Model.ActionUrl))
+    {
+        <div class="mt-5 flex justify-center">
+            <a asp-controller="@Model.ActionController" asp-action="@Model.ActionUrl" class="btn btn-primary">
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                <span>@Model.ActionText</span>
+            </a>
+        </div>
+    }
+</div>

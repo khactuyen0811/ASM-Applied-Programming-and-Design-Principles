@@ -1,0 +1,137 @@
+﻿@model SIMS.Models.LoginViewModel
+@{
+    Layout = "_LuminaAuthLayout";
+    ViewData["Title"] = "Institutional Sign-In";
+}
+
+<div class="academic-bg relative flex min-h-screen flex-col justify-between overflow-hidden text-light-on-surface">
+    <div class="academic-grid pointer-events-none absolute inset-0"></div>
+
+    <header class="relative z-10 flex w-full items-center justify-between px-6 py-6 sm:px-8">
+        <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-white shadow-md">
+                <img src="~/lumina/img/lumina-mark.svg" alt="" class="h-7 w-7" />
+            </div>
+            <div>
+                <span class="block font-headline text-headline-sm font-bold tracking-tight text-white">Lumina University</span>
+                <span class="block text-body-sm text-accent-container">Student Information Management System (SIMS)</span>
+            </div>
+        </div>
+        <span class="hidden rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-body-sm text-white/80 backdrop-blur-md md:inline-flex">Office of the Registrar</span>
+    </header>
+
+    <main class="relative z-10 flex flex-1 items-center justify-center px-4 py-8">
+        <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-light-border/60 bg-light-surface shadow-2xl dark:border-dark-border dark:bg-dark-surface">
+            <div class="relative bg-primary px-8 pb-7 pt-8 text-center text-white">
+                <div class="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/20 bg-white/10 shadow-inner">
+                    <span class="material-symbols-outlined text-[34px] text-accent">account_balance</span>
+                </div>
+                <h1 class="font-headline text-headline-lg font-bold tracking-tight">Institutional Single Sign-On</h1>
+                <p class="mt-1 text-body-sm text-blue-100">Access student records, course grading, and academic enrollment</p>
+            </div>
+
+            <div class="p-6 sm:p-8">
+                @if (ViewData["ErrorMessageLogin"] != null)
+                {
+                    <div class="mb-5 flex items-start gap-3 rounded-lg border border-error/50 bg-error-container/40 p-3.5 text-error" role="alert">
+                        <span class="material-symbols-outlined mt-0.5 shrink-0 text-[20px]">error</span>
+                        <div class="text-body-sm">
+                            <span class="block font-semibold">Authentication Failed</span>
+                            <span>@ViewData["ErrorMessageLogin"]</span>
+                        </div>
+                    </div>
+                }
+
+                <form asp-action="Index" method="post" class="space-y-4">
+                    <div>
+                        <label asp-for="Username" class="label">University Email or Username <span class="text-error">*</span></label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3.5 top-3 text-[18px] text-light-on-surface-muted">mail</span>
+                            <input asp-for="Username" type="text" autocomplete="username" placeholder="id@lumina.edu"
+                                   class="input py-2.5 pl-10 pr-4 text-body-md" />
+                        </div>
+                        <span asp-validation-for="Username" class="mt-1 block text-body-sm text-error"></span>
+                        <span class="mt-1 block text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Supports staff, student ID, and faculty accounts</span>
+                    </div>
+
+                    <div>
+                        <div class="mb-1.5 flex items-center justify-between">
+                            <label asp-for="Password" class="label mb-0">Password <span class="text-error">*</span></label>
+                            <span class="text-body-sm font-medium text-light-on-surface-muted dark:text-dark-on-surface-muted">Forgot password?</span>
+                        </div>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3.5 top-3 text-[18px] text-light-on-surface-muted">lock</span>
+                            <input asp-for="Password" type="password" autocomplete="current-password" placeholder="Enter your password"
+                                   class="input py-2.5 pl-10 pr-11 text-body-md" />
+                            <button type="button" data-password-toggle data-password-target="Password" aria-label="Show password"
+                                    class="absolute right-2 top-2 rounded p-1.5 text-light-on-surface-muted transition-colors hover:text-light-on-surface">
+                                <span data-password-icon class="material-symbols-outlined text-[18px]">visibility</span>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Password" class="mt-1 block text-body-sm text-error"></span>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-1">
+                        <label class="flex cursor-pointer select-none items-center gap-2">
+                            <input asp-for="RememberMe" class="checkbox" />
+                            <span class="text-body-sm text-light-on-surface dark:text-dark-on-surface">Remember this device for 30 days</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 text-label-lg font-semibold text-on-primary shadow-md transition-colors duration-state-change hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2">
+                        <span>Sign In to SIMS</span>
+                        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                    </button>
+                </form>
+
+                <div class="mt-6 rounded-xl border border-light-border bg-light-surface-subtle p-4 dark:border-dark-border dark:bg-dark-surface-subtle">
+                    <div class="mb-2 flex items-center gap-2 text-label-sm font-semibold uppercase tracking-wider text-light-on-surface-muted dark:text-dark-on-surface-muted">
+                        <span class="material-symbols-outlined text-[16px]">key</span>
+                        <span>Demo accounts</span>
+                    </div>
+                    <div class="grid grid-cols-1 gap-2 text-body-sm">
+                        <div class="flex items-center justify-between gap-2 rounded-lg bg-light-surface px-2.5 py-1.5 dark:bg-dark-surface">
+                            <span class="font-semibold text-primary">Admin</span>
+                            <code class="text-light-on-surface-muted dark:text-dark-on-surface-muted">trieunt/12345</code>
+                        </div>
+                        <div class="flex items-center justify-between gap-2 rounded-lg bg-light-surface px-2.5 py-1.5 dark:bg-dark-surface">
+                            <span class="font-semibold text-accent">Lecturer</span>
+                            <code class="text-light-on-surface-muted dark:text-dark-on-surface-muted">lecturer/12345</code>
+                        </div>
+                        <div class="flex items-center justify-between gap-2 rounded-lg bg-light-surface px-2.5 py-1.5 dark:bg-dark-surface">
+                            <span class="font-semibold text-success">Student</span>
+                            <code class="text-light-on-surface-muted dark:text-dark-on-surface-muted">student/12345</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 border-t border-light-border pt-5 text-center text-body-sm text-light-on-surface-muted dark:border-dark-border dark:text-dark-on-surface-muted">
+                    New student or faculty member? <span class="ml-1 font-semibold text-light-on-surface-muted dark:text-dark-on-surface-muted">Account activation is managed by the Registrar.</span>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <span class="inline-flex items-center gap-1.5 text-xs text-light-on-surface-muted/80 dark:text-dark-on-surface-muted">
+                        <span class="material-symbols-outlined text-[14px] text-success">lock</span>
+                        256-Bit SSL Encrypted &bull; FERPA Compliant
+                    </span>
+                </div>
+
+                <div class="mt-5 text-center">
+                    <a href="/Preview" class="inline-flex items-center gap-1.5 font-semibold text-accent hover:underline">
+                        <span class="material-symbols-outlined text-[16px]">visibility</span>
+                        Preview Student Portal (FAP-Inspired)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="relative z-10 w-full border-t border-white/5 px-8 py-4 text-center text-body-sm text-white/50">
+        &copy; 2026 Lumina University &bull; Office of the Registrar &amp; Academic Affairs &bull; ASP.NET Core Razor Edition
+    </footer>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

@@ -1,0 +1,329 @@
+@model CsvPreview
+@{
+    ViewData["Title"] = "CSV Import / Export";
+    ViewData["Breadcrumb"] = "Batch Data Operations";
+    ViewData["ActiveNav"] = "csv";
+
+    var preview = Model;
+    var result = ViewData["Result"] as CsvImportResult;
+    var kind = ViewData["Kind"] as CsvDatasetKind?;
+    var fileName = ViewData["FileName"] as string;
+    var fileSize = ViewData["FileSize"] as long?;
+
+    var errorRows = preview?.Rows.Count(r => !string.IsNullOrWhiteSpace(r.Error)) ?? 0;
+    var validRows = preview is null ? 0 : preview.Rows.Count - errorRows;
+
+    var schemaFields = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["student_identifier"] = "Student ID",
+        ["student_code"] = "Student ID",
+        ["studentid"] = "Student ID",
+        ["full_name"] = "Full Name",
+        ["fullname"] = "Full Name",
+        ["name"] = "Full Name",
+        ["email"] = "Institutional Email",
+        ["email_address"] = "Institutional Email",
+        ["phone"] = "Phone Number",
+        ["address"] = "Address",
+        ["gender"] = "Gender",
+        ["date_of_birth"] = "Date of Birth",
+        ["program"] = "Degree Program",
+        ["major_degree"] = "Degree Program",
+        ["enrollment_year"] = "Enrollment Year",
+        ["cohort_year"] = "Enrollment Year",
+        ["course_code"] = "Course Code",
+        ["course_title"] = "Course Title",
+        ["credits"] = "Academic Credits",
+        ["capacity"] = "Seat Capacity",
+        ["description"] = "Catalog Description"
+    };
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="page-title">CSV Batch Import &amp; Export Hub</h2>
+            <p class="page-subtitle">Upload CSV datasets, validate records and export institutional data in bulk.</p>
+        </div>
+        <span class="badge badge-primary">Administrator tool</span>
+    </div>
+
+    <section class="card p-6">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <h3 class="flex items-center gap-2 font-headline text-headline-sm font-bold text-primary">
+                <span class="material-symbols-outlined text-[22px]">upload_file</span>
+                <span>1. Upload Data File</span>
+            </h3>
+            <div class="flex gap-2">
+                <a asp-action="Template" asp-route-kind="Students" class="text-label-sm font-semibold text-accent hover:underline">Student template</a>
+                <span class="text-light-on-surface-muted">|</span>
+                <a asp-action="Template" asp-route-kind="Courses" class="text-label-sm font-semibold text-accent hover:underline">Course template</a>
+            </div>
+        </div>
+
+        <form asp-action="Preview" method="post" enctype="multipart/form-data" class="mt-4 space-y-4">
+            @Html.AntiForgeryToken()
+            <div class="rounded-2xl border-2 border-dashed border-accent/60 bg-accent-container/10 p-8 text-center">
+                <div class="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-container text-accent shadow-sm">
+                    <span class="material-symbols-outlined text-[32px]">cloud_upload</span>
+                </div>
+                <div class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Choose a CSV file to upload</div>
+                <p class="mx-auto mt-1 max-w-md text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Select a UTF-8 encoded .csv file. The first row must contain the column headers.</p>
+                <div class="mx-auto mt-4 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div class="text-left">
+                        <label for="csvKind" class="label">Dataset</label>
+                        <select id="csvKind" name="kind" class="select">
+                            <option value="Students" selected="@(kind != CsvDatasetKind.Courses)">Students</option>
+                            <option value="Courses" selected="@(kind == CsvDatasetKind.Courses)">Courses</option>
+                        </select>
+                    </div>
+                    <div class="text-left">
+                        <label for="csvFile" class="label">CSV File</label>
+                        <input id="csvFile" type="file" name="file" accept=".csv,text/csv" class="input py-2" required />
+                    </div>
+                </div>
+                <div class="mt-4 flex flex-wrap justify-center gap-2">
+                    <button type="submit" class="btn btn-secondary">
+                        <span class="material-symbols-outlined text-[18px]">preview</span>
+                        <span>Preview Rows</span>
+                    </button>
+                    <button type="submit" formaction="@Url.Action("Import", "Csv")" class="btn btn-primary" data-confirm="Import all valid rows into the database?">
+                        <span class="material-symbols-outlined text-[18px]">play_circle</span>
+                        <span>Run Import</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        @if (!string.IsNullOrWhiteSpace(fileName))
+        {
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-light-border bg-light-surface-subtle p-3 dark:border-dark-border dark:bg-dark-surface-subtle">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-[24px] text-success">task</span>
+                    <div>
+                        <div class="text-body-sm font-bold text-light-on-surface dark:text-dark-on-surface">@fileName</div>
+                        <div class="text-xs text-light-on-surface-muted dark:text-dark-on-surface-muted">
+                            @(((fileSize ?? 0) / 1024.0).ToString("0.0", CultureInfo.InvariantCulture)) KB &bull; @(preview?.TotalRows ?? result?.Total ?? 0) records detected
+                        </div>
+                    </div>
+                </div>
+                <span class="badge badge-success">@(kind?.ToString() ?? "Students") dataset</span>
+            </div>
+        }
+    </section>
+
+    @if (preview is not null && preview.Headers.Count > 0)
+    {
+        <section class="card p-6">
+            <div class="border-b border-light-border pb-3 dark:border-dark-border">
+                <h3 class="flex items-center gap-2 font-headline text-headline-sm font-bold text-primary">
+                    <span class="material-symbols-outlined text-[22px]">transform</span>
+                    <span>2. Schema Column Mapping</span>
+                </h3>
+                <p class="mt-0.5 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Detected CSV headers mapped to institutional SIMS attributes.</p>
+            </div>
+            <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                @foreach (var header in preview.Headers)
+                {
+                    var mapped = schemaFields.TryGetValue(header.Trim(), out var field) ? field : "Review required";
+                    var isMapped = mapped != "Review required";
+                    <div class="flex items-center justify-between gap-3 rounded-xl border border-light-border bg-light-surface-subtle p-3 dark:border-dark-border dark:bg-dark-surface-subtle">
+                        <div class="min-w-0">
+                            <div class="text-xs text-light-on-surface-muted dark:text-dark-on-surface-muted">CSV Header</div>
+                            <div class="truncate font-mono text-sm font-bold text-light-on-surface dark:text-dark-on-surface">@header</div>
+                        </div>
+                        <span class="material-symbols-outlined text-[18px] text-light-on-surface-muted dark:text-dark-on-surface-muted">arrow_forward</span>
+                        <div class="min-w-0 text-right">
+                            <div class="text-xs text-light-on-surface-muted dark:text-dark-on-surface-muted">SIMS Field</div>
+                            <div class="truncate text-body-sm font-semibold @(isMapped ? "text-primary" : "text-warning")">@mapped</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    @if (preview is not null)
+    {
+        <section class="card p-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-light-border pb-3 dark:border-dark-border">
+                <div>
+                    <h3 class="flex items-center gap-2 font-headline text-headline-sm font-bold text-primary">
+                        <span class="material-symbols-outlined text-[22px]">table_view</span>
+                        <span>2. Preview &amp; Validation (first @preview.Rows.Count rows)</span>
+                    </h3>
+                    <p class="mt-0.5 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@preview.TotalRows total rows detected. Review validation flags before importing.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="badge badge-success">@validRows valid</span>
+                    @if (errorRows > 0)
+                    {
+                        <span class="badge badge-error">@errorRows flagged</span>
+                    }
+                </div>
+            </div>
+
+            @if (preview.Headers.Count > 0)
+            {
+                <div class="mt-4 flex flex-wrap gap-2">
+                    @foreach (var header in preview.Headers)
+                    {
+                        <span class="rounded bg-primary-container px-2.5 py-1 font-mono text-xs font-bold text-primary">@header</span>
+                    }
+                </div>
+            }
+
+            @if (preview.Errors.Count > 0)
+            {
+                <div class="mt-4 rounded-xl border border-error/30 bg-error-container/40 p-3 text-body-sm text-error">
+                    @foreach (var error in preview.Errors)
+                    {
+                        <div>@error</div>
+                    }
+                </div>
+            }
+
+            <div class="mt-4 overflow-x-auto">
+                <table class="table-lumina">
+                    <thead>
+                        <tr>
+                            <th># Row</th>
+                            @foreach (var header in preview.Headers)
+                            {
+                                <th>@header</th>
+                            }
+                            <th>Validation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (preview.Rows.Count == 0)
+                        {
+                            <tr><td colspan="@(preview.Headers.Count + 2)" class="text-center text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">The file did not contain any data rows.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var row in preview.Rows)
+                            {
+                                <tr class="@(!string.IsNullOrWhiteSpace(row.Error) ? "bg-error-container/20" : string.Empty)">
+                                    <td class="tabular-nums @(!string.IsNullOrWhiteSpace(row.Error) ? "font-bold text-error" : "text-light-on-surface-muted dark:text-dark-on-surface-muted")">@row.RowNumber</td>
+                                    @foreach (var value in row.Values)
+                                    {
+                                        <td class="text-light-on-surface dark:text-dark-on-surface">@value</td>
+                                    }
+                                    <td>
+                                        @if (string.IsNullOrWhiteSpace(row.Error))
+                                        {
+                                            <span class="badge badge-success">Valid</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-error" title="@row.Error">Flagged</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (errorRows > 0)
+            {
+                <div class="mt-3 space-y-1 text-body-sm text-error">
+                    @foreach (var row in preview.Rows.Where(r => !string.IsNullOrWhiteSpace(r.Error)))
+                    {
+                        <div>Row @row.RowNumber: @row.Error</div>
+                    }
+                </div>
+            }
+        </section>
+    }
+
+    @if (result is not null)
+    {
+        var percent = result.Total <= 0 ? 0 : (int)Math.Round(result.Imported / (double)result.Total * 100);
+        <section class="card p-6">
+            <h3 class="flex items-center gap-2 font-headline text-headline-sm font-bold text-primary">
+                <span class="material-symbols-outlined text-[22px]">play_circle</span>
+                <span>3. Import Result</span>
+            </h3>
+
+            <div class="mt-4 space-y-2">
+                <div class="flex justify-between text-body-sm">
+                    <span class="font-bold text-light-on-surface dark:text-dark-on-surface">@(result.Succeeded ? "Import completed" : "Import completed with errors")</span>
+                    <span class="font-bold text-primary tabular-nums">@percent%</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" style="width: @(percent)%"></div></div>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div class="rounded-xl border border-success/30 bg-success-container/20 p-4">
+                    <div class="text-xs font-bold uppercase text-success">Imported</div>
+                    <div class="mt-1 font-headline text-headline-lg font-bold text-success tabular-nums">@result.Imported records</div>
+                </div>
+                <div class="rounded-xl border border-error/30 bg-error-container/20 p-4">
+                    <div class="text-xs font-bold uppercase text-error">Failed</div>
+                    <div class="mt-1 font-headline text-headline-lg font-bold text-error tabular-nums">@result.Failed records</div>
+                </div>
+                <div class="rounded-xl border border-light-border bg-light-surface-subtle p-4 dark:border-dark-border dark:bg-dark-surface-subtle">
+                    <div class="text-xs font-bold uppercase text-light-on-surface-muted dark:text-dark-on-surface-muted">Total Rows</div>
+                    <div class="mt-1 font-headline text-headline-lg font-bold text-light-on-surface tabular-nums dark:text-dark-on-surface">@result.Total records</div>
+                </div>
+            </div>
+
+            @if (result.Errors.Count > 0)
+            {
+                <div class="mt-4 overflow-x-auto">
+                    <table class="table-lumina">
+                        <thead>
+                            <tr><th>Row</th><th>Error</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var error in result.Errors)
+                            {
+                                <tr>
+                                    <td class="font-bold text-error tabular-nums">@error.RowNumber</td>
+                                    <td class="text-light-on-surface dark:text-dark-on-surface">@error.Message</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <div class="mt-5 flex flex-wrap justify-end gap-3 border-t border-light-border pt-4 dark:border-dark-border">
+                <a asp-controller="Student" asp-action="Index" class="btn btn-secondary">View Students</a>
+                <a asp-controller="Course" asp-action="Index" class="btn btn-primary">View Courses</a>
+            </div>
+        </section>
+    }
+
+    <section class="card p-6">
+        <h3 class="flex items-center gap-2 font-headline text-headline-sm font-bold text-primary">
+            <span class="material-symbols-outlined text-[22px]">download</span>
+            <span>Export Institutional Data</span>
+        </h3>
+        <p class="mt-0.5 text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Download the current dataset as a UTF-8 CSV file.</p>
+        <div class="mt-4 flex flex-wrap gap-3">
+            <a asp-action="Export" asp-route-kind="Students" class="btn btn-secondary">
+                <span class="material-symbols-outlined text-[18px]">file_download</span>
+                <span>Export Students</span>
+            </a>
+            <a asp-action="Export" asp-route-kind="Courses" class="btn btn-secondary">
+                <span class="material-symbols-outlined text-[18px]">file_download</span>
+                <span>Export Courses</span>
+            </a>
+            <a asp-action="Export" asp-route-kind="Enrollments" class="btn btn-secondary">
+                <span class="material-symbols-outlined text-[18px]">file_download</span>
+                <span>Export Enrollments</span>
+            </a>
+        </div>
+    </section>
+
+    @if (preview is null && result is null)
+    {
+        <div class="card p-6">
+            <partial name="Partials/_EmptyState" model="@(new EmptyStateModel { Icon = "cloud_sync", Title = "No batch operation yet", Message = "Upload a CSV file to preview and validate its rows, or export an existing dataset above." })" />
+        </div>
+    }
+</div>

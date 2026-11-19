@@ -1,0 +1,110 @@
+@model PagedResult<TeacherListItem>
+@{
+    ViewData["Title"] = "Teachers";
+    ViewData["Breadcrumb"] = "Faculty Directory";
+    ViewData["ActiveNav"] = "teacher";
+
+    var search = ViewData["Search"] as string;
+    var routeValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    if (!string.IsNullOrWhiteSpace(search)) { routeValues["search"] = search!; }
+
+    var pagination = new PaginationModel
+    {
+        Page = Model.Page,
+        PageSize = Model.PageSize,
+        TotalCount = Model.TotalCount,
+        Action = "Index",
+        Controller = "Teacher",
+        RouteValues = routeValues
+    };
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="page-title">Faculty Directory</h2>
+            <p class="page-subtitle">Manage teaching staff profiles, departments and course assignments.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">
+            <span class="material-symbols-outlined text-[18px]">person_add</span>
+            <span>Add Teacher</span>
+        </a>
+    </div>
+
+    <form asp-action="Index" method="get" class="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="relative w-full sm:w-96">
+            <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-[18px] text-light-on-surface-muted dark:text-dark-on-surface-muted">search</span>
+            <input type="search" name="search" value="@search" placeholder="Search by name, code or email..." class="input pl-10" />
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="submit" class="btn btn-primary">Search</button>
+            <a asp-action="Index" class="btn btn-secondary">Reset</a>
+            <span class="badge badge-neutral">@Model.TotalCount teachers</span>
+        </div>
+    </form>
+
+    <div class="overflow-hidden rounded-xl border border-light-border bg-light-surface shadow-sm dark:border-dark-border dark:bg-dark-surface">
+        <div class="overflow-x-auto">
+            <table class="table-lumina">
+                <thead>
+                    <tr>
+                        <th>Teacher</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Courses</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5">
+                                @await Html.PartialAsync("Partials/_EmptyState", new EmptyStateModel
+                                {
+                                    Icon = "badge",
+                                    Title = "No teachers found",
+                                    Message = "No faculty profiles match the current search. Add a new teacher to get started.",
+                                    ActionText = "Add Teacher",
+                                    ActionUrl = "Create",
+                                    ActionController = "Teacher"
+                                })
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var teacher in Model.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <span class="avatar avatar-initials h-9 w-9 text-[12px]">@UiFormat.Initials(teacher.FullName)</span>
+                                        <div class="min-w-0">
+                                            <div class="truncate font-semibold text-light-on-surface dark:text-dark-on-surface">@teacher.FullName</div>
+                                            <div class="truncate font-mono text-body-sm text-primary">@teacher.TeacherCode</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-light-on-surface dark:text-dark-on-surface">@teacher.Email</td>
+                                <td class="text-light-on-surface dark:text-dark-on-surface">@teacher.Department</td>
+                                <td><span class="badge badge-info">@teacher.CourseCount courses</span></td>
+                                <td class="text-right">
+                                    <div class="inline-flex items-center gap-2">
+                                        <a asp-action="Details" asp-route-id="@teacher.Id" class="text-label-md font-semibold text-primary hover:underline">Details</a>
+                                        <a asp-action="Edit" asp-route-id="@teacher.Id" class="text-label-md font-semibold text-accent hover:underline">Edit</a>
+                                        <form asp-action="Delete" asp-route-id="@teacher.Id" method="post" class="inline" data-confirm="Delete this teacher record?">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="text-label-md font-semibold text-error hover:underline">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <partial name="Partials/_Pagination" model="pagination" />
+    </div>
+</div>

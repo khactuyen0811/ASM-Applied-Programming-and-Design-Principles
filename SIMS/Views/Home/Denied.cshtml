@@ -1,0 +1,47 @@
+@{
+    Layout = "_LuminaAuthLayout";
+    ViewData["Title"] = "Access Denied";
+    var requestId = ViewData["RequestId"] as string ?? Context.TraceIdentifier;
+    var displayName = User.FindFirst("DisplayName")?.Value ?? User.Identity?.Name ?? "Anonymous session";
+    var roleLabel = User.IsInRole("Admin")
+        ? "System Administrator"
+        : User.IsInRole("Lecturer")
+            ? "Faculty Member"
+            : User.IsInRole("Student")
+                ? "Student Self-Service"
+                : "Unauthenticated";
+}
+
+<main class="flex min-h-screen items-center justify-center bg-light-surface-subtle px-4 py-12 dark:bg-dark-surface">
+    <div class="w-full max-w-xl space-y-6 rounded-2xl border border-error/30 bg-light-surface p-8 text-center shadow-xl sm:p-10 dark:border-error/40 dark:bg-dark-surface">
+        <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-error-container text-error shadow-inner">
+            <span class="material-symbols-outlined text-[44px]">gpp_bad</span>
+        </div>
+
+        <div>
+            <span class="inline-flex rounded-full bg-error-container px-3 py-1 text-label-sm font-bold uppercase tracking-wider text-error">HTTP 403 Forbidden</span>
+            <h1 class="mt-2 font-headline text-headline-xl-mobile font-bold text-light-on-surface sm:text-headline-xl dark:text-dark-on-surface">Access Denied</h1>
+            <p class="mx-auto mt-2 max-w-md text-body-md text-light-on-surface-muted dark:text-dark-on-surface-muted">
+                Your institutional credentials do not carry the privileges required to view this administrative area. If you believe this is an error, contact the Office of the Registrar.
+            </p>
+        </div>
+
+        <div class="space-y-1 rounded-xl border border-light-border bg-light-surface-subtle p-4 text-left text-xs font-mono text-light-on-surface-muted dark:border-dark-border dark:bg-dark-surface-subtle dark:text-dark-on-surface-muted">
+            <div>Target resource: @Context.Request.Path</div>
+            <div>User session: @displayName</div>
+            <div>Current role: @roleLabel</div>
+            <div>Request ID: @requestId</div>
+        </div>
+
+        <div class="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row">
+            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-primary w-full sm:w-auto">
+                <span class="material-symbols-outlined text-[18px]">home</span>
+                <span>Return to Dashboard</span>
+            </a>
+            <button type="button" onclick="history.back()" class="btn btn-secondary w-full sm:w-auto">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                <span>Go Back</span>
+            </button>
+        </div>
+    </div>
+</main>

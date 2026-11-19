@@ -1,0 +1,35 @@
+@{
+    Layout = "_LuminaAuthLayout";
+    ViewData["Title"] = "Record Not Found";
+}
+
+<main class="flex min-h-screen items-center justify-center bg-light-surface-subtle px-4 py-12 dark:bg-dark-surface">
+    <div class="w-full max-w-xl space-y-6 rounded-2xl border border-light-border bg-light-surface p-8 text-center shadow-xl sm:p-10 dark:border-dark-border dark:bg-dark-surface">
+        <div class="mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-primary-container text-primary shadow-inner dark:bg-dark-surface-container dark:text-dark-on-surface">
+            <span class="material-symbols-outlined text-[54px]">travel_explore</span>
+        </div>
+
+        <div>
+            <span class="inline-flex rounded-full bg-primary-container px-3 py-1 text-label-sm font-bold uppercase tracking-wider text-primary dark:bg-dark-surface-container dark:text-dark-on-surface">Error 404</span>
+            <h1 class="mt-2 font-headline text-headline-xl-mobile font-bold text-light-on-surface sm:text-headline-xl dark:text-dark-on-surface">Academic Record Not Located</h1>
+            <p class="mx-auto mt-2 max-w-md text-body-md text-light-on-surface-muted dark:text-dark-on-surface-muted">
+                The student profile, course catalog entry, or administrative URL you requested does not exist or may have been archived by the registrar.
+            </p>
+        </div>
+
+        <div class="rounded-xl border border-light-border bg-light-surface-subtle px-3 py-2 text-xs font-mono text-light-on-surface-muted dark:border-dark-border dark:bg-dark-surface-subtle dark:text-dark-on-surface-muted">
+            HTTP 404: @(Context.Request.Path)@(Context.Request.QueryString)
+        </div>
+
+        <div class="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row">
+            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-primary w-full sm:w-auto">
+                <span class="material-symbols-outlined text-[18px]">home</span>
+                <span>Return to Dashboard</span>
+            </a>
+            <button type="button" onclick="history.back()" class="btn btn-secondary w-full sm:w-auto">
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                <span>Go Back</span>
+            </button>
+        </div>
+    </div>
+</main>

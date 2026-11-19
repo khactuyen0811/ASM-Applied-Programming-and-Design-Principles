@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SIMS Lumina</title>
+    <link rel="icon" type="image/svg+xml" href="~/lumina/img/lumina-mark.svg" />
+    <script>
+        (function () {
+            try {
+                var stored = window.localStorage.getItem('sims-theme');
+                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (stored === 'dark' || (stored !== 'light' && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (error) {
+                return;
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="~/lumina/css/fonts.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lumina/css/lumina.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", false)
+</head>
+<body class="min-h-screen bg-light-surface-subtle font-body text-light-on-surface antialiased dark:bg-dark-surface dark:text-dark-on-surface">
+    @RenderBody()
+    <script src="~/lumina/js/lumina.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", false)
+</body>
+</html>

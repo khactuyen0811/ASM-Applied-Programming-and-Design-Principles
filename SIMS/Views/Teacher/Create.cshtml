@@ -1,0 +1,60 @@
+@model TeacherCreateRequest
+@{
+    ViewData["Title"] = "Add Teacher";
+    ViewData["Breadcrumb"] = "New Teacher";
+    ViewData["ActiveNav"] = "teacher";
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="page-title">Add Faculty Member</h2>
+            <p class="page-subtitle">Create a teaching staff profile for course assignment.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            <span>Back to Faculty</span>
+        </a>
+    </div>
+
+    <form asp-action="Create" method="post" class="card p-6">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="mb-4 rounded-lg bg-error-container px-4 py-3 text-body-sm font-semibold text-error empty:hidden"></div>
+
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div>
+                <label asp-for="TeacherCode" class="label">Teacher Code <span class="text-error">*</span></label>
+                <input asp-for="TeacherCode" class="input font-mono uppercase" placeholder="TCH-0001" />
+                <span asp-validation-for="TeacherCode" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div>
+                <label asp-for="FullName" class="label">Full Name <span class="text-error">*</span></label>
+                <input asp-for="FullName" class="input" placeholder="e.g. Prof. Alan Turing" />
+                <span asp-validation-for="FullName" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div>
+                <label asp-for="Email" class="label">Email <span class="text-error">*</span></label>
+                <input asp-for="Email" type="email" class="input" placeholder="faculty@lumina.edu" />
+                <span asp-validation-for="Email" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div>
+                <label asp-for="Phone" class="label">Phone</label>
+                <input asp-for="Phone" class="input" placeholder="+1 555 0100" />
+                <span asp-validation-for="Phone" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+            <div class="md:col-span-2">
+                <label asp-for="Department" class="label">Department <span class="text-error">*</span></label>
+                <input asp-for="Department" class="input" placeholder="e.g. Computer Science" />
+                <span asp-validation-for="Department" class="mt-1 block text-body-sm text-error"></span>
+            </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3 border-t border-light-border pt-5 dark:border-dark-border">
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                <span class="material-symbols-outlined text-[18px]">save</span>
+                <span>Save Teacher</span>
+            </button>
+        </div>
+    </form>
+</div>

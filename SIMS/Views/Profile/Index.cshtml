@@ -1,0 +1,152 @@
+@model UserDetails
+@{
+    ViewData["Title"] = "Profile & Settings";
+    ViewData["Breadcrumb"] = "Account Settings";
+    ViewData["ActiveNav"] = "profile";
+
+    var student = ViewData["Student"] as StudentDetails;
+    var teacher = ViewData["Teacher"] as TeacherDetails;
+    var roleLabel = Model.Role switch
+    {
+        UserRole.Admin => "System Administrator",
+        UserRole.Lecturer => "Faculty Member",
+        _ => "Student"
+    };
+}
+
+<div class="space-y-6">
+    <div>
+        <h2 class="page-title">Profile &amp; Settings</h2>
+        <p class="page-subtitle">Manage your display name, password and accessibility preferences.</p>
+    </div>
+
+    <div class="card p-6">
+        <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-4">
+                <span class="avatar avatar-initials h-16 w-16 text-xl">@UiFormat.Initials(Model.DisplayName)</span>
+                <div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <h3 class="font-headline text-headline-lg font-bold text-light-on-surface dark:text-dark-on-surface">@Model.DisplayName</h3>
+                        <partial name="Partials/_StatusBadge" model="UiFormat.RoleBadge(Model.Role)" />
+                    </div>
+                    <p class="mt-1 font-mono text-body-md text-light-on-surface-muted dark:text-dark-on-surface-muted">@Model.Username</p>
+                    <p class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">@roleLabel &bull; Member since @UiFormat.FormatDate(Model.CreatedAt)</p>
+                </div>
+            </div>
+            <div class="flex flex-col items-start gap-1 text-body-sm sm:items-end">
+                <span class="badge @(Model.IsActive ? "badge-success" : "badge-error")">@(Model.IsActive ? "Active account" : "Suspended")</span>
+                <span class="text-light-on-surface-muted dark:text-dark-on-surface-muted">@Model.LinkedEmail</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="space-y-6 lg:col-span-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Account Information</h3>
+                </div>
+                <form asp-action="UpdateDisplayName" method="post" class="card-body space-y-4">
+                    @Html.AntiForgeryToken()
+                    <div>
+                        <label for="displayName" class="label">Display Name</label>
+                        <input id="displayName" name="displayName" value="@Model.DisplayName" class="input" required />
+                    </div>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                            <label class="label">Username</label>
+                            <input value="@Model.Username" class="input" disabled />
+                        </div>
+                        <div>
+                            <label class="label">Linked Email</label>
+                            <input value="@Model.LinkedEmail" class="input" disabled />
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="btn btn-primary">Update Display Name</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Change Password</h3>
+                </div>
+                <form asp-action="ChangePassword" method="post" class="card-body space-y-4">
+                    @Html.AntiForgeryToken()
+                    <div>
+                        <label for="currentPassword" class="label">Current Password</label>
+                        <input id="currentPassword" name="currentPassword" type="password" class="input" required autocomplete="current-password" />
+                    </div>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                            <label for="newPassword" class="label">New Password</label>
+                            <input id="newPassword" name="newPassword" type="password" class="input" required minlength="6" autocomplete="new-password" />
+                        </div>
+                        <div>
+                            <label for="confirmPassword" class="label">Confirm New Password</label>
+                            <input id="confirmPassword" name="confirmPassword" type="password" class="input" required minlength="6" autocomplete="new-password" />
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="btn btn-primary">Change Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Accessibility</h3>
+                </div>
+                <div class="card-body space-y-4">
+                    <div>
+                        <label for="fontScale" class="label">Interface Text Size</label>
+                        <select id="fontScale" data-font-scale class="select">
+                            <option value="90">Compact (90%)</option>
+                            <option value="100">Standard (100%)</option>
+                            <option value="110">Large (110%)</option>
+                            <option value="125">Extra Large (125%)</option>
+                        </select>
+                    </div>
+                    <label class="flex items-center justify-between gap-3 rounded-lg border border-light-border p-3 dark:border-dark-border">
+                        <span class="text-body-sm font-semibold text-light-on-surface dark:text-dark-on-surface">High contrast mode</span>
+                        <input type="checkbox" data-contrast-toggle class="checkbox" />
+                    </label>
+                    <p class="text-body-sm text-light-on-surface-muted dark:text-dark-on-surface-muted">Preferences are stored in this browser.</p>
+                </div>
+            </div>
+
+            @if (student is not null)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Student Record</h3>
+                    </div>
+                    <div class="card-body space-y-3 text-body-sm">
+                        <div class="flex items-center justify-between"><span class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Student Code</span><span class="font-mono font-semibold text-primary">@student.StudentCode</span></div>
+                        <div class="flex items-center justify-between"><span class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Program</span><span class="font-semibold text-light-on-surface dark:text-dark-on-surface">@student.Program</span></div>
+                        <div class="flex items-center justify-between"><span class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Cohort</span><span class="font-semibold text-light-on-surface dark:text-dark-on-surface">@student.EnrollmentYear</span></div>
+                        <div class="flex items-center justify-between"><span class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Status</span><partial name="Partials/_StatusBadge" model="UiFormat.StudentStatusBadge(student.Status)" /></div>
+                        <a asp-controller="Student" asp-action="Details" asp-route-id="@student.Id" class="btn btn-secondary mt-2 w-full">Open Student Profile</a>
+                    </div>
+                </div>
+            }
+            else if (teacher is not null)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="font-headline text-headline-sm font-bold text-light-on-surface dark:text-dark-on-surface">Faculty Record</h3>
+                    </div>
+                    <div class="card-body space-y-3 text-body-sm">
+                        <div class="flex items-center justify-between"><span class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Teacher Code</span><span class="font-mono font-semibold text-primary">@teacher.TeacherCode</span></div>
+                        <div class="flex items-center justify-between"><span class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Department</span><span class="font-semibold text-light-on-surface dark:text-dark-on-surface">@teacher.Department</span></div>
+                        <div class="flex items-center justify-between"><span class="text-light-on-surface-muted dark:text-dark-on-surface-muted">Phone</span><span class="font-semibold text-light-on-surface dark:text-dark-on-surface">@(string.IsNullOrWhiteSpace(teacher.Phone) ? "--" : teacher.Phone)</span></div>
+                        <a asp-controller="Teacher" asp-action="Details" asp-route-id="@teacher.Id" class="btn btn-secondary mt-2 w-full">Open Faculty Profile</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
